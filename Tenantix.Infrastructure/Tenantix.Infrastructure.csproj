@@ -1,0 +1,30 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Folder Include="Identity\Security\" />
+    <Folder Include="Persistence\Shared\Configurations\" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Finbuckle.MultiTenant" Version="8.1.9" />
+    <PackageReference Include="Finbuckle.MultiTenant.EntityFrameworkCore" Version="8.1.9" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="10.0.1">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
+    <PackageReference Include="Microsoft.Extensions.Options.ConfigurationExtensions" Version="10.0.1" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Tenantix.Application\Tenantix.Application.csproj" />
+    <ProjectReference Include="..\Tenantix.Domain\Tenantix.Domain.csproj" />
+    <ProjectReference Include="..\Tenantix.Shared\Tenantix.Shared.csproj" />
+  </ItemGroup>
+
+</Project>
