@@ -9,5 +9,9 @@ namespace Tenantix.Infrastructure.Identity.Models
 {
     public class ApplicationRole : IdentityRole
     {
+        public string TenantId { get; set; } = default!;
+
+    
+        public string? Description { get; set; }
     }
 }

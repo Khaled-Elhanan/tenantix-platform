@@ -8,17 +8,19 @@
 
   <ItemGroup>
     <Folder Include="Identity\Security\" />
-    <Folder Include="Persistence\Shared\Configurations\" />
   </ItemGroup>
 
   <ItemGroup>
     <PackageReference Include="Finbuckle.MultiTenant" Version="8.1.9" />
+    <PackageReference Include="Finbuckle.MultiTenant.AspNetCore" Version="8.1.9" />
     <PackageReference Include="Finbuckle.MultiTenant.EntityFrameworkCore" Version="8.1.9" />
-    <PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="10.0.1">
+    <PackageReference Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" Version="8.0.22" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="8.0.21" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="8.0.21">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
-    <PackageReference Include="Microsoft.Extensions.Options.ConfigurationExtensions" Version="10.0.1" />
+    <PackageReference Include="Microsoft.Extensions.Options.ConfigurationExtensions" Version="8.0.0" />
   </ItemGroup>
 
   <ItemGroup>

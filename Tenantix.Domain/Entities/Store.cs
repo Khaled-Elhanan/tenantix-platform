@@ -6,14 +6,16 @@ using System.Threading.Tasks;
 
 namespace Tenantix.Domain.Entities
 {
-    public class Tenant
+    public class Store
     {
-        public Guid Id { get; set; }
-        public string Identifier { get; set; } = default!;
+       public Guid Id { get; set; }
+
         public string Name { get; set; } = default!;
-        public string ConnectionString { get; set; } = default!;
-        public DateTime? ValidUpTo { get; set; }
+        public string Slug { get; set; } = default!; 
+
+        public string Currency { get; set; } = "EGY";
         public bool IsActive { get; set; }
 
+        public DateTime CreatedAt { get; set; }
     }
 }
