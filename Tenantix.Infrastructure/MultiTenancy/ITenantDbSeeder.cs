@@ -8,6 +8,6 @@ namespace Tenantix.Infrastructure.MultiTenancy
 {
     public interface ITenantDbSeeder
     {
-        Task IntializeDatabaseAsync(CancellationToken cancellationToken);
+        Task InitializeDatabaseAsync(CancellationToken cancellationToken);
     }
 }

@@ -8,7 +8,6 @@
 
   <ItemGroup>
     <Folder Include="Abstractions\Authentication\" />
-    <Folder Include="Abstractions\Authorization\" />
     <Folder Include="Abstractions\Services\" />
     <Folder Include="Abstractions\Persistence\" />
     <Folder Include="Common\Interfaces\" />

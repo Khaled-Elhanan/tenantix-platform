@@ -29,7 +29,7 @@ namespace Tenantix.Infrastructure.Persistence.Shared.Configurations.Core
             builder.Property(x => x.Currency)
                 .HasMaxLength(3)
                 .HasDefaultValue("EGY");
-                                                                         u
+                                                                         
             builder.Property(x => x.CreatedAt)
                 .HasDefaultValueSql("GETUTCDATE()");
         }

@@ -1,18 +1,105 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using Finbuckle.MultiTenant;
+using Finbuckle.MultiTenant.Abstractions;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
+using Tenantix.Application.Common.Constants.Tenancy;
 
 namespace Tenantix.Infrastructure.MultiTenancy
 {
     public class TenantDbSeeder : ITenantDbSeeder
     {
+        private readonly TenantDbContext _tenantDbContext;
+        private readonly IServiceProvider _serviceProvider;
+        private readonly IConfiguration _configuration;
 
-
-        public Task IntializeDatabaseAsync(CancellationToken cancellationToken)
+        public TenantDbSeeder(
+            TenantDbContext tenantDbContext,
+            IServiceProvider serviceProvider,
+            IConfiguration configuration)
         {
-            throw new NotImplementedException();
+            _tenantDbContext = tenantDbContext;
+            _serviceProvider = serviceProvider;
+            _configuration = configuration;
+        }
+
+        public async Task InitializeDatabaseAsync(CancellationToken cancellationToken)
+        {
+            await InitializeTenantDbAsync(cancellationToken);
+
+            var tenants = await _tenantDbContext.TenantInfo
+                .Where(t => t.IsActive && t.ValidUpTo > DateTime.UtcNow)
+                .ToListAsync(cancellationToken);
+
+            foreach (var tenant in tenants)
+            {
+                await InitializeApplicationDbForTenantAsync(tenant, cancellationToken);
+            }
+        }
+
+        private async Task InitializeTenantDbAsync(CancellationToken cancellationToken)
+        {
+            var rootTenant = await _tenantDbContext.TenantInfo.FindAsync(
+                new object[] { TenancyConstants.Root.Id },
+                cancellationToken);
+
+            if (rootTenant is null)
+            {
+                var defaultConnectionString =
+                    _configuration.GetConnectionString("DefaultConnection")
+                    ?? throw new InvalidOperationException("DefaultConnection is missing");
+
+                rootTenant = new ApplicationTenantInfo
+                {
+                    Id = TenancyConstants.Root.Id,
+                    Identifier = TenancyConstants.Root.Identifier,
+                    Name = TenancyConstants.Root.Name,
+                    OwnerEmail = TenancyConstants.Root.Email,
+                    CompanyName = "System",
+                    ConnectionString = defaultConnectionString,
+                    IsActive = true,
+                    ValidUpTo = DateTime.UtcNow.AddYears(
+                        TenancyConstants.DefaultTenantValidityInYears)
+                };
+
+                await _tenantDbContext.TenantInfo.AddAsync(rootTenant, cancellationToken);
+                await _tenantDbContext.SaveChangesAsync(cancellationToken);
+            }
+            else if (string.IsNullOrWhiteSpace(rootTenant.ConnectionString))
+            {
+                rootTenant.ConnectionString =
+                    _configuration.GetConnectionString("DefaultConnection");
+
+                await _tenantDbContext.SaveChangesAsync(cancellationToken);
+            }
+        }
+
+        private async Task InitializeApplicationDbForTenantAsync(
+            ApplicationTenantInfo currentTenant,
+            CancellationToken cancellationToken)
+        {
+            if (string.IsNullOrWhiteSpace(currentTenant.ConnectionString))
+            {
+                currentTenant.ConnectionString =
+                    _configuration.GetConnectionString("DefaultConnection");
+
+                await _tenantDbContext.SaveChangesAsync(cancellationToken);
+            }
+
+            using var scope = _serviceProvider.CreateScope();
+
+            scope.ServiceProvider
+                .GetRequiredService<IMultiTenantContextSetter>()
+                .MultiTenantContext = new MultiTenantContext<ApplicationTenantInfo>
+                {
+                    TenantInfo = currentTenant
+                };
+
+
+                    await scope.ServiceProvider
+                    .GetRequiredService<ApplicationDbSeeder>()
+                    .InitializeDatabaseAsync(cancellationToken);
+                                                                                                         
         }
     }
 }
