@@ -39,6 +39,8 @@ namespace Tenantix.Infrastructure.MultiTenancy
 
         private async Task InitializeTenantDbAsync(CancellationToken cancellationToken)
         {
+            await _tenantDbContext.Database.MigrateAsync(cancellationToken);
+
             var rootTenant = await _tenantDbContext.TenantInfo.FindAsync(
                 new object[] { TenancyConstants.Root.Id },
                 cancellationToken);

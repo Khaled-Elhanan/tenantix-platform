@@ -1,12 +1,17 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Reflection;
+using MediatR;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.IdentityModel.Tokens;
 
 namespace Tenantix.Application
 {
-    public class DependencyInjection
+    public static class DependencyInjection
     {
+        public static IServiceCollection AddApplicationServices(this IServiceCollection services)
+        {
+            var assembly = Assembly.GetExecutingAssembly();
+
+            return services.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(assembly));
     }
+}
 }

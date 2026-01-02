@@ -137,7 +137,9 @@ public class ApplicationDbSeeder
                 NormalizedUserName = username.ToUpperInvariant(),
                 TenantId = tenantId,
                 IsActive = true,
-                EmailConfirmed = true
+                EmailConfirmed = true,
+                FirstName = tenantId,
+                LastName = "Owner"
             };
 
             var hasher = new PasswordHasher<ApplicationUser>();
