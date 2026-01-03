@@ -3,7 +3,9 @@ using NJsonSchema;
 using NSwag;
 using NSwag.Generation.Processors.Contexts;
 
-namespace Infrastructure.OpenApi;
+namespace Tenantix.Infrastructure.OpenApi;
+
+using global::Infrastructure.OpenApi;
 using NSwag.Generation.Processors;
 
 public class SwaggerHeaderAttributeProcessor:IOperationProcessor

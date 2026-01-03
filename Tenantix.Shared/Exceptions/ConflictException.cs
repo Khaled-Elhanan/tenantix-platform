@@ -7,15 +7,15 @@ using System.Threading.Tasks;
 
 namespace Tenantix.Shared.Exceptions
 {
-    public class NotFoundException : Exception
+    public class ConflictException  :Exception
     {
         public List<string> ErrorMessage { get; set; }
         public HttpStatusCode StatusCode { get; set; }
 
-        public NotFoundException(List<string> errorMessage = default, HttpStatusCode statusCode = HttpStatusCode.NotFound)
+        public ConflictException(List<string>errorMessage=default ,  HttpStatusCode statusCode=HttpStatusCode.Conflict)
         {
             ErrorMessage = errorMessage;
-            StatusCode = statusCode;
+            statusCode=statusCode;
         }
     }
 }

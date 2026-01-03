@@ -11,6 +11,7 @@ public static class StorePermissions
         bool RequiresPaidPlan = false)
     {
         public string Name => $"Permission.{Feature}.{Action}";
+
     }
 
     private static readonly StorePermission[] _all =
@@ -52,4 +53,6 @@ public static class StorePermissions
 
     public static IReadOnlyList<StorePermission> Viewer =>
         _all.Where(p => p.Action == StoreActions.Read).ToList();
+
+    public static string NameFor(string action, string feature) => $"Permission.{feature}.{action}";
 }

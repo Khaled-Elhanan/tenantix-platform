@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace Tenantix.Application.Common.Constants.Authorization
 {
-    public class ClaimConstants
+    public static class ClaimConstants
     {
         public const string Tenant = "tenant";
         public const string Permissions = "permissions";

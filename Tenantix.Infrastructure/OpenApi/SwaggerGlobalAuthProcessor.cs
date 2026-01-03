@@ -6,7 +6,7 @@ using NSwag.Generation.Processors;
 using NSwag.Generation.Processors.Contexts;
 using System.Reflection;
 
-namespace Infrastructure.OpenApi;
+namespace Tenantix.Infrastructure.OpenApi;
 
 public sealed class SwaggerGlobalAuthProcessor : IOperationProcessor
 {
