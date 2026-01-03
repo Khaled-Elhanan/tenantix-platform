@@ -17,6 +17,9 @@ namespace Tenantix.Application.Common.Constants.Authorization
 
         public const string Manage = nameof(Manage);
         public const string Upgrade = nameof(Upgrade);
+
+
+        public const string RefreshToken = nameof(RefreshToken);
        
     }
 }

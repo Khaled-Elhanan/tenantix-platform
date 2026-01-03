@@ -25,6 +25,9 @@ using Tenantix.Shared.Responses;
 using NSwag;
 using NSwag.Generation.AspNetCore;
 using NSwag.Generation.Processors.Security;
+using Tenantix.Application.Features.Tenancy;
+using Tenantix.Application.Common.Interfaces;
+using Tenantix.Infrastructure.Identity.Security;
 
 namespace Tenantix.Infrastructure;
 
@@ -45,6 +48,10 @@ public static class DependencyInjection
             options.UseSqlServer(config.GetConnectionString("DefaultConnection"), o => o.EnableRetryOnFailure()))
             .AddTransient<ITenantDbSeeder, TenantDbSeeder>()
             .AddTransient<ApplicationDbSeeder>()
+            .AddTransient<ITokenService, TokenService>()
+            .AddTransient<ITenantService, TenantService>()  
+            .AddPermissions()
+            .AddOpenApiDocumentation(config)
             .AddIdentityService();
             
 

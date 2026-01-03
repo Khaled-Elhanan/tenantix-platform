@@ -15,7 +15,11 @@ namespace Tenantix.Infrastructure.Identity.Models
         public string FirstName { get; set; } = default!;
         public string LastName { get; set; } = default!;
 
-        
+        public string RefreshToken { get; set; } = string.Empty;
+
+        public DateTime RefreshTokenExpiryTime { get; set; }
         public bool IsActive { get; set; } = true;
+
+
     }
 }

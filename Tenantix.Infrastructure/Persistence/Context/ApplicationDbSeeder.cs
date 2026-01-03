@@ -129,7 +129,7 @@ public class ApplicationDbSeeder
         if (user == null)
         {
             user = new ApplicationUser
-            {
+            {                                                                                 
                 Id = Guid.NewGuid().ToString(),
                 Email = email,
                 UserName = username,
@@ -140,7 +140,7 @@ public class ApplicationDbSeeder
                 EmailConfirmed = true,
                 FirstName = tenantId,
                 LastName = "Owner"
-            };
+            };                                                                           
 
             var hasher = new PasswordHasher<ApplicationUser>();
             user.PasswordHash = hasher.HashPassword(

@@ -15,5 +15,7 @@ namespace Tenantix.Application.Common.Constants.Authorization
         public const string Staff = nameof(Staff);
         public const string Billing = nameof(Billing);
         public const string Settings = nameof(Settings);
+
+        public const string Tokens = nameof(Tokens);
     }
 }

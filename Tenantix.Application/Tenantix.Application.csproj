@@ -10,12 +10,11 @@
     <Folder Include="Abstractions\Authentication\" />
     <Folder Include="Abstractions\Services\" />
     <Folder Include="Abstractions\Persistence\" />
-    <Folder Include="Common\Interfaces\" />
     <Folder Include="Common\Models\" />
-    <Folder Include="Features\" />
   </ItemGroup>
 
   <ItemGroup>
+    <PackageReference Include="FluentValidation" Version="12.1.1" />
     <PackageReference Include="MediatR" Version="14.0.0" />
   </ItemGroup>
 
