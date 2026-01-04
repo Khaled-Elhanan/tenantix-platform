@@ -8,7 +8,7 @@ namespace Tenantix_WebApi.Controllers
     [ApiController]
     public class BaseApiController : ControllerBase
     {
-        private ISender? _sender;
+       
         protected ISender Sender =>
             HttpContext.RequestServices.GetRequiredService<ISender>();
 

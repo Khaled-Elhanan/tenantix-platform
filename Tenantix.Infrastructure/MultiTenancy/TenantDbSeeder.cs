@@ -56,7 +56,7 @@ namespace Tenantix.Infrastructure.MultiTenancy
                     Id = TenancyConstants.Root.Id,
                     Identifier = TenancyConstants.Root.Identifier,
                     Name = TenancyConstants.Root.Name,
-                    OwnerEmail = TenancyConstants.Root.Email,
+                    OwnerEmail = TenancyConstants.Root.AdminEmail,
                     CompanyName = "System",
                     ConnectionString = defaultConnectionString,
                     IsActive = true,

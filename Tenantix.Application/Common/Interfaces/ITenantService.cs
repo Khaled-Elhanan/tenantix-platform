@@ -1,5 +1,6 @@
+using Tenantix.Application.Features.Tenancy;
 
-namespace Tenantix.Application.Features.Tenancy;
+namespace Tenantix.Application.Common.Interfaces;
 
 public interface ITenantService
 {

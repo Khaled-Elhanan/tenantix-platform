@@ -23,11 +23,11 @@ using Tenantix.Infrastructure.MultiTenancy;
 using Tenantix.Infrastructure.Persistence.Tenant;
 using Tenantix.Shared.Responses;
 using NSwag;
-using NSwag.Generation.AspNetCore;
 using NSwag.Generation.Processors.Security;
-using Tenantix.Application.Features.Tenancy;
 using Tenantix.Application.Common.Interfaces;
 using Tenantix.Infrastructure.Identity.Security;
+using Tenantix.Infrastructure.Mappings;
+using Mapster;
 
 namespace Tenantix.Infrastructure;
 
@@ -36,6 +36,13 @@ public static class DependencyInjection
     public static IServiceCollection AddInfrastructureServices(this IServiceCollection services,
             IConfiguration config)
     {
+        // Configure Mapster
+        var typeAdapterConfig = TypeAdapterConfig.GlobalSettings;
+        // Scans the assembly and gets the IRegister, adding the registration to the TypeAdapterConfig
+        typeAdapterConfig.Scan(typeof(MapsterConfig).Assembly);
+        // register the mapper as IMapper
+        services.AddMapster();
+
         return services
             .AddDbContext<TenantDbContext>(options =>
             options.UseSqlServer(config.GetConnectionString("DefaultConnection"), o => o.EnableRetryOnFailure()))
@@ -262,8 +269,6 @@ public static class DependencyInjection
             .UseMultiTenant()
             .UseAuthorization()
             .UseOpenApiDocumentation();
-
-
 
 
     }

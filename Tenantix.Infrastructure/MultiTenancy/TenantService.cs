@@ -6,6 +6,7 @@ using System.Net;
 using Tenantix.Application.Features.Tenancy;
 using Tenantix.Shared.Exceptions;
 using Mapster;
+using Tenantix.Application.Common.Interfaces;
 namespace Tenantix.Infrastructure.MultiTenancy
 {
     public class TenantService : ITenantService
@@ -65,15 +66,15 @@ namespace Tenantix.Infrastructure.MultiTenancy
                 IsActive = createTenant.IsActive,
                 Name = createTenant.Name,
                 ConnectionString = connectionString,
-                OwnerEmail = createTenant.Email,
-                CompanyName = createTenant.FirstName,
+                OwnerEmail = createTenant.AdminEmail,
+                
                 
                 ValidUpTo = createTenant.ValidUpTo == default ? DateTime.UtcNow.AddYears(1) : createTenant.ValidUpTo
             };
 
             await _tenantStore.TryAddAsync(newTenant);
 
-            // ?? IMPORTANT: run seeder INSIDE tenant context
+            // IMPORTANT: run seeder INSIDE tenant context
             using var scope = _serviceProvider.CreateScope();
 
             var tenantContextSetter =
@@ -107,21 +108,7 @@ namespace Tenantix.Infrastructure.MultiTenancy
         {
             var tenantInDb = await _tenantStore.TryGetAsync(tenantId);
 
-            #region Manual Mapping --> without using Mapster
-            //var tenantResponse = new TenantResponse
-            // {
-            //     Identifier = tenantInDb.Identifier,
-            //     IsActive = tenantInDb.IsActive,
-            //     Name = tenantInDb.Name,
-            //     ConnectionString = tenantInDb.ConnectionString,
-            //     Email = tenantInDb.Email,
-            //     FirstName = tenantInDb.FirstName,
-            //     LastName = tenantInDb.LastName,
-            //     ValidUpTo = tenantInDb.ValidUpTo,
-            //
-            // };
 
-            #endregion
 
             // Using Mapster
             return tenantInDb.Adapt<TenantResponse>();

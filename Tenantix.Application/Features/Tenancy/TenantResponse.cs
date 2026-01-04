@@ -7,9 +7,8 @@ public class TenantResponse
 
     public string ConnectionString { get; set; }
 
-    public string? Email { get; set; }
-    public string? FirstName { get; set; }
-    public string? LastName  { get; set; }
+    public string AdminEmail { get; set; }
+
         
 
     public DateTime ValidUpTo { get; set; }

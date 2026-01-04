@@ -16,9 +16,9 @@ namespace Tenantix.Application.Common.Constants.Tenancy
             public const string Id = "root";
             public const string Identifier = "root";
             public const string Name = "System";
-            public const string Email = "DeathNote@gamil.com";
-            public const string DefaultPassword = "Ghost123!";
+            public const string AdminEmail = "DeathNote@gamil.com";
+            public const string DefaultPassword = "Ghost123";
             public const bool IsActive = true;
         }
     }
-}
+}                                                               
