@@ -4,7 +4,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
-using Tenantix.Infrastructure.MultiTenancy;
+using Tenantix.Infrastructure.MultiTenancy.Persistence;
 
 #nullable disable
 
@@ -22,7 +22,7 @@ namespace Tenantix.Infrastructure.Migrations
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
 
-            modelBuilder.Entity("Tenantix.Infrastructure.MultiTenancy.ApplicationTenantInfo", b =>
+            modelBuilder.Entity("Tenantix.Infrastructure.MultiTenancy.Models.ApplicationTenantInfo", b =>
                 {
                     b.Property<string>("Id")
                         .HasMaxLength(64)

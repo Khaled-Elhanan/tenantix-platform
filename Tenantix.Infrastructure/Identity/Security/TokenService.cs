@@ -10,11 +10,11 @@ using Tenantix.Application;
 using Tenantix.Application.Common.Constants.Authorization;
 using Tenantix.Application.Common.Constants.Tenancy;
 using Tenantix.Infrastructure.Identity.Models;
-using Tenantix.Infrastructure.MultiTenancy;
 using Tenantix.Shared.Exceptions;
 using Tenantix.Application.Common.Interfaces;
 using Tenantix.Application.Common.Identity.Tokens;
 using Tenantix.Application.Common.Identity;
+using Tenantix.Infrastructure.MultiTenancy.Models;
 
 namespace Tenantix.Infrastructure.Identity.Security;
 

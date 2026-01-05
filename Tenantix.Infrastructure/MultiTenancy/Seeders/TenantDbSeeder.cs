@@ -4,8 +4,10 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Tenantix.Application.Common.Constants.Tenancy;
+using Tenantix.Infrastructure.MultiTenancy.Models;
+using Tenantix.Infrastructure.MultiTenancy.Persistence;
 
-namespace Tenantix.Infrastructure.MultiTenancy
+namespace Tenantix.Infrastructure.MultiTenancy.Seeders
 {
     public class TenantDbSeeder : ITenantDbSeeder
     {

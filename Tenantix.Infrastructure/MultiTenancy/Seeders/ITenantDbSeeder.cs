@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Tenantix.Infrastructure.MultiTenancy
+namespace Tenantix.Infrastructure.MultiTenancy.Seeders
 {
     public interface ITenantDbSeeder
     {

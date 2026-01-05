@@ -7,7 +7,8 @@ using Tenantix.Application.Features.Tenancy;
 using Tenantix.Shared.Exceptions;
 using Mapster;
 using Tenantix.Application.Common.Interfaces;
-namespace Tenantix.Infrastructure.MultiTenancy
+using Tenantix.Infrastructure.MultiTenancy.Models;
+namespace Tenantix.Infrastructure.MultiTenancy.Services
 {
     public class TenantService : ITenantService
     {

@@ -19,8 +19,6 @@ using Tenantix.Application;
 using Tenantix.Application.Common.Constants.Authorization;
 using Tenantix.Infrastructure.Identity.Auth;
 using Tenantix.Infrastructure.Identity.Models;
-using Tenantix.Infrastructure.MultiTenancy;
-using Tenantix.Infrastructure.Persistence.Tenant;
 using Tenantix.Shared.Responses;
 using NSwag;
 using NSwag.Generation.Processors.Security;
@@ -28,6 +26,11 @@ using Tenantix.Application.Common.Interfaces;
 using Tenantix.Infrastructure.Identity.Security;
 using Tenantix.Infrastructure.Mappings;
 using Mapster;
+using Tenantix.Infrastructure.Persistence.Context;
+using Tenantix.Infrastructure.MultiTenancy.Models;
+using Tenantix.Infrastructure.MultiTenancy.Persistence;
+using Tenantix.Infrastructure.MultiTenancy.Seeders;
+using Tenantix.Infrastructure.MultiTenancy.Services;
 
 namespace Tenantix.Infrastructure;
 

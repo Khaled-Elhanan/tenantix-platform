@@ -5,9 +5,9 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using System.Reflection;
 using Tenantix.Infrastructure.Identity.Models;
-using Tenantix.Infrastructure.MultiTenancy;
+using Tenantix.Infrastructure.MultiTenancy.Models;
 
-namespace Tenantix.Infrastructure.Persistence.Tenant
+namespace Tenantix.Infrastructure.Persistence.Context
 {
     public abstract class BaseDbContext
         : MultiTenantIdentityDbContext<ApplicationUser, 

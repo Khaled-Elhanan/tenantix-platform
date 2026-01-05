@@ -11,6 +11,8 @@
     <Folder Include="Abstractions\Services\" />
     <Folder Include="Abstractions\Persistence\" />
     <Folder Include="Common\Models\" />
+    <Folder Include="Features\Stores\Commands\" />
+    <Folder Include="Features\Stores\Queries\" />
   </ItemGroup>
 
   <ItemGroup>

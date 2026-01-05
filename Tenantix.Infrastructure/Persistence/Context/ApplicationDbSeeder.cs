@@ -5,8 +5,8 @@ using System.Text.RegularExpressions;
 using Tenantix.Application.Common.Constants.Authorization;
 using Tenantix.Application.Common.Constants.Tenancy;
 using Tenantix.Infrastructure.Identity.Models;
-using Tenantix.Infrastructure.MultiTenancy;
-using Tenantix.Infrastructure.Persistence.Tenant;
+using Tenantix.Infrastructure.MultiTenancy.Models;
+using Tenantix.Infrastructure.Persistence.Context;
 
 public class ApplicationDbSeeder
 {

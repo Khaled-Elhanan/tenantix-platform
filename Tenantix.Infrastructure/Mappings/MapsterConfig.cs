@@ -1,6 +1,6 @@
 using Mapster;
 using Tenantix.Application.Features.Tenancy;
-using Tenantix.Infrastructure.MultiTenancy;
+using Tenantix.Infrastructure.MultiTenancy.Models;
 
 namespace Tenantix.Infrastructure.Mappings;
 
@@ -15,7 +15,5 @@ public class MapsterConfig : IRegister
         // Map OwnerEmail (source entity property) to AdminEmail (destination DTO property)
         config.NewConfig<ApplicationTenantInfo, TenantResponse>()
             .Map(dest => dest.AdminEmail, src => src.OwnerEmail);
-
-        // Note: Other properties with matching names will be mapped automatically.
     }
 }

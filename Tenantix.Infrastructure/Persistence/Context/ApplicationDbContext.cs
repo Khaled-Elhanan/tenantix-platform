@@ -2,9 +2,9 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Identity.Client;
 using Tenantix.Domain.Entities;
-using Tenantix.Infrastructure.MultiTenancy;
+using Tenantix.Infrastructure.MultiTenancy.Models;
 
-namespace Tenantix.Infrastructure.Persistence.Tenant
+namespace Tenantix.Infrastructure.Persistence.Context
 {
     public class ApplicationDbContext : BaseDbContext
     {
@@ -20,7 +20,7 @@ namespace Tenantix.Infrastructure.Persistence.Tenant
             base.OnModelCreating(builder);
             builder.Ignore<ApplicationTenantInfo>();
         }
-        public DbSet<Store> Stores => Set<Store>();
+        public DbSet<Tenant> Tenants => Set<Tenant>();
            
            
         

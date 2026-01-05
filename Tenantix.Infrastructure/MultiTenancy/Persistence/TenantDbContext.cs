@@ -5,8 +5,9 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Tenantix.Infrastructure.MultiTenancy.Models;
 
-namespace Tenantix.Infrastructure.MultiTenancy
+namespace Tenantix.Infrastructure.MultiTenancy.Persistence
 {
         public class TenantDbContext(DbContextOptions<TenantDbContext> options) :
             EFCoreStoreDbContext<ApplicationTenantInfo>(options)

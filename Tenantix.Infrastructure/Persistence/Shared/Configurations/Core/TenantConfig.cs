@@ -1,5 +1,4 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.Metadata;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using System;
 using System.Collections.Generic;
@@ -10,36 +9,31 @@ using Tenantix.Domain.Entities;
 
 namespace Tenantix.Infrastructure.Persistence.Shared.Configurations.Core
 {
-    public class StoreConfig : IEntityTypeConfiguration<Store>
+    public class TenantConfig : IEntityTypeConfiguration<Tenant>
     {
-        public void Configure(EntityTypeBuilder<Store> builder)
+        public void Configure(EntityTypeBuilder<Tenant> builder)
         {
-            builder.ToTable("Stores", "Core");
-
+            builder.ToTable("Tenants ", "Core");
             builder.HasKey(x => x.Id);
-
-            builder.Property(x => x.TenantId)
-                .IsRequired()
-                .HasMaxLength(64);
-
             builder.Property(x => x.Name)
-                .IsRequired()
-                .HasMaxLength(150);
+            .IsRequired()
+            .HasMaxLength(150);
 
             builder.Property(x => x.Slug)
                 .IsRequired()
                 .HasMaxLength(150);
 
-            builder.HasIndex(x => new { x.TenantId, x.Slug })
-                .IsUnique();
+            builder.HasIndex(x => x.Slug)
+                .IsUnique(); 
 
-            builder.Property(x => x.DefaultCurrency)
-                .IsRequired()
-                .HasMaxLength(3);
+            builder.Property(x=> x.IsActive)
+                .HasDefaultValue(true); 
+
 
             builder.Property(x => x.CreatedAt)
                 .HasDefaultValueSql("GETUTCDATE()");
         }
-
     }
+
 }
+
