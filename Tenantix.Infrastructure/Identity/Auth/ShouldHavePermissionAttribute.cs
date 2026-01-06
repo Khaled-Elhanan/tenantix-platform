@@ -14,5 +14,10 @@ namespace Tenantix.Infrastructure.Identity.Auth
         {
             Policy = StorePermissions.NameFor(action, feature); 
         }
+
+        public ShouldHavePermissionAttribute(string permissionName)
+        {
+            Policy = permissionName;
+        }
     }
 }

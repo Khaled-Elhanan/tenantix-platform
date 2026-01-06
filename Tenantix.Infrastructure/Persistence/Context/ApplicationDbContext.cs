@@ -1,9 +1,7 @@
 ﻿using Finbuckle.MultiTenant.Abstractions;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Identity.Client;
 using Tenantix.Domain.Entities;
 using Tenantix.Infrastructure.MultiTenancy.Models;
-
 namespace Tenantix.Infrastructure.Persistence.Context
 {
     public class ApplicationDbContext : BaseDbContext
@@ -21,6 +19,7 @@ namespace Tenantix.Infrastructure.Persistence.Context
             builder.Ignore<ApplicationTenantInfo>();
         }
         public DbSet<Tenant> Tenants => Set<Tenant>();
+        public DbSet<Tenantix.Domain.Entities.Product> Products => Set<Tenantix.Domain.Entities.Product>();
            
            
         

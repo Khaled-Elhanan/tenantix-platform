@@ -11,6 +11,18 @@ namespace Tenantix.Application.Common.Constants.Tenancy
 
         public const int DefaultTenantValidityInYears = 1;
 
+        public static class TenantTypes
+        {
+            public const string Root = "Root";
+            public const string Store = "Store";
+        }
+
+        public static class TenantPolicies
+        {
+            public const string PlatformTenantOnly = "TenantType.PlatformOnly";
+            public const string StoreTenantOnly = "TenantType.StoreOnly";
+        }
+
         public static class Root
         {
             public const string Id = "root";

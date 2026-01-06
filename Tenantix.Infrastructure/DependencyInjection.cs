@@ -17,6 +17,7 @@ using System.Security.Claims;
 using System.Text;
 using Tenantix.Application;
 using Tenantix.Application.Common.Constants.Authorization;
+using Tenantix.Application.Common.Constants.Tenancy;
 using Tenantix.Infrastructure.Identity.Auth;
 using Tenantix.Infrastructure.Identity.Models;
 using Tenantix.Shared.Responses;
@@ -31,6 +32,7 @@ using Tenantix.Infrastructure.MultiTenancy.Models;
 using Tenantix.Infrastructure.MultiTenancy.Persistence;
 using Tenantix.Infrastructure.MultiTenancy.Seeders;
 using Tenantix.Infrastructure.MultiTenancy.Services;
+using Tenantix.Infrastructure.Products.Services;
 
 namespace Tenantix.Infrastructure;
 
@@ -60,6 +62,7 @@ public static class DependencyInjection
             .AddTransient<ApplicationDbSeeder>()
             .AddTransient<ITokenService, TokenService>()
             .AddTransient<ITenantService, TenantService>()  
+            .AddTransient<IProductService, ProductService>()  
             .AddPermissions()
             .AddOpenApiDocumentation(config)
             .AddIdentityService();
@@ -93,7 +96,8 @@ public static class DependencyInjection
     
         return service
             .AddSingleton<IAuthorizationPolicyProvider, PermissionPolicyProvider>()
-            .AddScoped<IAuthorizationHandler, PermissionAuthorizationHandler>();
+            .AddScoped<IAuthorizationHandler, PermissionAuthorizationHandler>()
+            .AddScoped<IAuthorizationHandler, TenantTypeAuthorizationHandler>();
 
     }
 
@@ -101,7 +105,7 @@ public static class DependencyInjection
     {
         var jwtSettingsConfig = configuration.GetSection(nameof(JwtSettings));
         services.Configure<JwtSettings>(jwtSettingsConfig);
-        return jwtSettingsConfig.Get<JwtSettings>();
+        return jwtSettingsConfig.Get<JwtSettings>() ?? new JwtSettings();
     }   
 
 
@@ -186,19 +190,52 @@ public static class DependencyInjection
         services
             .AddAuthorization(options =>
             {
-                foreach (var prop in typeof(StorePermissions).GetNestedTypes()
-                    .SelectMany(t => t.GetFields(BindingFlags.Public | BindingFlags.FlattenHierarchy)))
-                {
-                    var propertyValue = prop.GetValue(null);
-                    if (propertyValue is not null)
-                    {
-                        options.AddPolicy(propertyValue.ToString(),
-                            policy => policy.RequireClaim(ClaimConstants.Permissions, propertyValue.ToString()));
+                // Store permissions
+                AddPermissionPolicies(options, typeof(StorePermissions));
 
-                    }
-                }
+                // Platform permissions
+                AddPermissionPolicies(options, typeof(PlatformPermissions));
+
+                // Tenant type separation policies
+                options.AddPolicy(TenancyConstants.TenantPolicies.StoreTenantOnly,
+                    policy => policy.Requirements.Add(
+                        new TenantTypeRequirement(TenancyConstants.TenantTypes.Store)));
+
+                options.AddPolicy(TenancyConstants.TenantPolicies.PlatformTenantOnly,
+                    policy => policy.Requirements.Add(
+                        new TenantTypeRequirement(TenancyConstants.TenantTypes.Root)));
             });
         return services;
+    }
+
+    private static void AddPermissionPolicies(AuthorizationOptions options, Type permissionsRootType)
+    {
+        foreach (var prop in permissionsRootType.GetNestedTypes()
+                     .SelectMany(t => t.GetFields(BindingFlags.Public | BindingFlags.FlattenHierarchy)))
+        {
+            var propertyValue = prop.GetValue(null);
+            if (propertyValue is string name && !string.IsNullOrWhiteSpace(name))
+            {
+                options.AddPolicy(name,
+                    policy => policy.RequireClaim(ClaimConstants.Permissions, name));
+            }
+        }
+
+        // Support classes exposing a static All property
+        var allProp = permissionsRootType.GetProperty("All", BindingFlags.Public | BindingFlags.Static);
+        if (allProp?.GetValue(null) is IEnumerable<object> perms)
+        {
+            foreach (var perm in perms)
+            {
+                var nameProp = perm.GetType().GetProperty("Name");
+                var name = nameProp?.GetValue(perm)?.ToString();
+                if (!string.IsNullOrWhiteSpace(name))
+                {
+                    options.AddPolicy(name,
+                        policy => policy.RequireClaim(ClaimConstants.Permissions, name));
+                }
+            }
+        }
     }
 
 
@@ -206,6 +243,10 @@ public static class DependencyInjection
             IConfiguration config)
     {
         var swaggerSettings = config.GetSection(nameof(SwaggerSettings)).Get<SwaggerSettings>();
+        if (swaggerSettings is null)
+        {
+            throw new InvalidOperationException("SwaggerSettings configuration section is missing.");
+        }
 
         services.AddEndpointsApiExplorer();
 

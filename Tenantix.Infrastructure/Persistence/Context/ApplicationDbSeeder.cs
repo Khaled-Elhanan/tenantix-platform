@@ -45,15 +45,22 @@ public class ApplicationDbSeeder
         var tenant = _tenantContext.MultiTenantContext?.TenantInfo
             ?? throw new InvalidOperationException("Tenant context is missing.");
 
-        var tenantId = tenant.Identifier!;
+        var tenantId = tenant.Identifier
+            ?? throw new InvalidOperationException("Tenant identifier is missing.");
 
-        var roles = new[]
-        {
-            ("Owner", StorePermissions.Owner),
-            ("Admin", StorePermissions.Admin),
-            ("Staff", StorePermissions.Staff),
-            ("Viewer", StorePermissions.All.Where(p => p.Action == StoreActions.Read))
-        };
+        var roles = tenant.TenantType == TenancyConstants.TenantTypes.Root
+            ? new[]
+            {
+                ("Owner", PlatformPermissions.Owner.Cast<object>().ToList()),
+                ("Admin", PlatformPermissions.Admin.Cast<object>().ToList())
+            }
+            : new[]
+            {
+                ("Owner", StorePermissions.Owner.Cast<object>().ToList()),
+                ("Admin", StorePermissions.Admin.Cast<object>().ToList()),
+                ("Staff", StorePermissions.Staff.Cast<object>().ToList()),
+                ("Viewer", StorePermissions.All.Where(p => p.Action == StoreActions.Read).Cast<object>().ToList())
+            };
 
         foreach (var (roleName, permissions) in roles)
         {
@@ -83,25 +90,33 @@ public class ApplicationDbSeeder
 
     private async Task AssignPermissionsAsync(
         ApplicationRole role,
-        IReadOnlyList<StorePermissions.StorePermission> permissions,
+        IReadOnlyList<object> permissions,
         CancellationToken cancellationToken)
     {
         var existingClaims = await _roleManager.GetClaimsAsync(role);
 
         foreach (var permission in permissions)
         {
+            var nameProp = permission.GetType().GetProperty("Name");
+            var descProp = permission.GetType().GetProperty("Description");
+            var permName = nameProp?.GetValue(permission)?.ToString();
+            var permDesc = descProp?.GetValue(permission)?.ToString();
+
+            if (string.IsNullOrWhiteSpace(permName))
+                continue;
+
             if (existingClaims.Any(c =>
                     c.Type == ClaimConstants.Permissions &&
-                    c.Value == permission.Name))
+                    c.Value == permName))
                 continue;
 
             await _context.RoleClaims.AddAsync(new ApplicationRoleClaim
             {
                 RoleId = role.Id,
-                RoleName = role.Name,
+                RoleName = role.Name ?? string.Empty,
                 ClaimType = ClaimConstants.Permissions,
-                ClaimValue = permission.Name,
-                Description = permission.Description
+                ClaimValue = permName!,
+                Description = permDesc
             }, cancellationToken);
         }
 
@@ -115,6 +130,12 @@ public class ApplicationDbSeeder
     {
         var tenant = _tenantContext.MultiTenantContext?.TenantInfo;
         if (tenant == null) return;
+
+        // Skip seeding store owner for platform tenant.
+        if (tenant.TenantType == TenancyConstants.TenantTypes.Root)
+        {
+            return;
+        }
 
         var tenantId = tenant.Identifier!;
         var email = tenant.OwnerEmail ?? $"{tenantId}@store.local";

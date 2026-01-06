@@ -9,6 +9,7 @@ namespace Tenantix.Application.Common.Constants.Authorization
     public static class ClaimConstants
     {
         public const string Tenant = "tenant";
+        public const string TenantType = "tenant_type";
         public const string Permissions = "permissions";
         public const string Role = "role";
         public const string UserId = "userId";  

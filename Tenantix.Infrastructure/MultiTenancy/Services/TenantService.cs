@@ -68,8 +68,7 @@ namespace Tenantix.Infrastructure.MultiTenancy.Services
                 Name = createTenant.Name,
                 ConnectionString = connectionString,
                 OwnerEmail = createTenant.AdminEmail,
-                
-                
+                TenantType = Tenantix.Application.Common.Constants.Tenancy.TenancyConstants.TenantTypes.Store,
                 ValidUpTo = createTenant.ValidUpTo == default ? DateTime.UtcNow.AddYears(1) : createTenant.ValidUpTo
             };
 

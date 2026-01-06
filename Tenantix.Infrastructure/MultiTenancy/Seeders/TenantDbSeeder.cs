@@ -62,6 +62,7 @@ namespace Tenantix.Infrastructure.MultiTenancy.Seeders
                     CompanyName = "System",
                     ConnectionString = defaultConnectionString,
                     IsActive = true,
+                    TenantType = TenancyConstants.TenantTypes.Root,
                     ValidUpTo = DateTime.UtcNow.AddYears(
                         TenancyConstants.DefaultTenantValidityInYears)
                 };
@@ -69,12 +70,27 @@ namespace Tenantix.Infrastructure.MultiTenancy.Seeders
                 await _tenantDbContext.TenantInfo.AddAsync(rootTenant, cancellationToken);
                 await _tenantDbContext.SaveChangesAsync(cancellationToken);
             }
-            else if (string.IsNullOrWhiteSpace(rootTenant.ConnectionString))
+            else
             {
-                rootTenant.ConnectionString =
-                    _configuration.GetConnectionString("DefaultConnection");
+                var updated = false;
 
-                await _tenantDbContext.SaveChangesAsync(cancellationToken);
+                if (string.IsNullOrWhiteSpace(rootTenant.ConnectionString))
+                {
+                    rootTenant.ConnectionString =
+                        _configuration.GetConnectionString("DefaultConnection");
+                    updated = true;
+                }
+
+                if (string.IsNullOrWhiteSpace(rootTenant.TenantType))
+                {
+                    rootTenant.TenantType = TenancyConstants.TenantTypes.Root;
+                    updated = true;
+                }
+
+                if (updated)
+                {
+                    await _tenantDbContext.SaveChangesAsync(cancellationToken);
+                }
             }
         }
 

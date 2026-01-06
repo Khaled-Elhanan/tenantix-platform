@@ -1,16 +1,13 @@
-﻿namespace Tenantix.Domain.Entities
+﻿using Tenantix.Domain.Common;
+
+namespace Tenantix.Domain.Entities
 {
-    public class Tenant
+    public class Tenant :BaseEntity
     {
-       public Guid Id { get; set; }
-
         public string Name { get; set; } = default!;
-        public string Slug { get; set; } = default!; 
-
+        public string Slug { get; set; } = default!;
         public bool IsActive { get; set; }
         public DateTime ValidUpTo { get; set; }
 
-        public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
-        public string? DefaultCurrency { get; set; }
     }
 }

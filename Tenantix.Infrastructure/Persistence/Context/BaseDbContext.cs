@@ -4,6 +4,7 @@ using Finbuckle.MultiTenant.EntityFrameworkCore;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using System.Reflection;
+using Tenantix.Domain.Common;
 using Tenantix.Infrastructure.Identity.Models;
 using Tenantix.Infrastructure.MultiTenancy.Models;
 
@@ -18,8 +19,7 @@ namespace Tenantix.Infrastructure.Persistence.Context
             ApplicationRoleClaim,
             IdentityUserToken<string>>
     {
-
-        private new ApplicationTenantInfo  ? TenantInfo { get; set; }
+        private new ApplicationTenantInfo? TenantInfo { get; set; }
 
         protected BaseDbContext(
             IMultiTenantContextAccessor<ApplicationTenantInfo> tenantContextAccessor,
@@ -37,9 +37,50 @@ namespace Tenantix.Infrastructure.Persistence.Context
 
             if (!string.IsNullOrWhiteSpace(TenantInfo?.ConnectionString))
             {
-                  optionsBuilder.UseSqlServer(TenantInfo.ConnectionString , 
-                      options=>options.MigrationsAssembly(Assembly.GetExecutingAssembly().FullName));
+                optionsBuilder.UseSqlServer(
+                    TenantInfo.ConnectionString,
+                    options => options.MigrationsAssembly(Assembly.GetExecutingAssembly().FullName));
             }
+        }
+
+        /// <summary>
+        /// Ensure all added entities that derive from <see cref="TenantEntity"/> have their
+        /// <c>TenantId</c> set from the current <see cref="ApplicationTenantInfo"/>.
+        /// This keeps tenant assignment in the infrastructure layer and out of domain/application code.
+        /// </summary>
+        private void ApplyTenantIds()
+        {
+            // If there is no resolved tenant, don't silently assign anything.
+            // You might choose to throw here instead, depending on your requirements.
+            var currentTenantId = TenantInfo?.Id;
+            if (string.IsNullOrWhiteSpace(currentTenantId))
+            {
+                return;
+            }
+
+            var entries = ChangeTracker.Entries<TenantEntity>()
+                .Where(e => e.State == EntityState.Added);
+
+            foreach (var entry in entries)
+            {
+                // Only set TenantId if the entity hasn't explicitly set it.
+                if (string.IsNullOrWhiteSpace(entry.Entity.TenantId))
+                {
+                    entry.Entity.TenantId = currentTenantId!;
+                }
+            }
+        }
+
+        public override int SaveChanges(bool acceptAllChangesOnSuccess)
+        {
+            ApplyTenantIds();
+            return base.SaveChanges(acceptAllChangesOnSuccess);
+        }
+
+        public override Task<int> SaveChangesAsync(bool acceptAllChangesOnSuccess, CancellationToken cancellationToken = default)
+        {
+            ApplyTenantIds();
+            return base.SaveChangesAsync(acceptAllChangesOnSuccess, cancellationToken);
         }
 
         protected override void OnModelCreating(ModelBuilder builder)

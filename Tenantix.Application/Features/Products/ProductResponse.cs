@@ -4,9 +4,9 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Tenantix.Application.Features.Stores
+namespace Tenantix.Application.Features.Products
 {
-    public class StoreResponse
+    public class ProductResponse
     {
     }
 }

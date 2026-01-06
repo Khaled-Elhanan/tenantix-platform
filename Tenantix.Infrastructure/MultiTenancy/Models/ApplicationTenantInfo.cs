@@ -20,5 +20,6 @@ namespace Tenantix.Infrastructure.MultiTenancy.Models
         public string? CompanyName { get; set; }
         public bool IsActive { get; set; }
         public DateTime ValidUpTo { get; set; }
+        public string TenantType { get; set; } = Tenantix.Application.Common.Constants.Tenancy.TenancyConstants.TenantTypes.Store;
     }
 }
