@@ -8,7 +8,7 @@ using System.Security.Cryptography;
 using System.Text;
 using Tenantix.Application;
 using Tenantix.Application.Common.Constants.Authorization;
-using Tenantix.Application.Common.Constants.Tenancy;
+using Tenantix.Application.Common.Constants.MultiTenancy;
 using Tenantix.Infrastructure.Identity.Models;
 using Tenantix.Shared.Exceptions;
 using Tenantix.Application.Common.Interfaces;

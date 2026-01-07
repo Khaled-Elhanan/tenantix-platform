@@ -1,5 +1,5 @@
 using Microsoft.AspNetCore.Authorization;
-using Tenantix.Application.Common.Constants.Tenancy;
+using Tenantix.Application.Common.Constants.MultiTenancy;
 using Tenantix.Infrastructure.MultiTenancy.Models;
 using Finbuckle.MultiTenant.Abstractions;
 

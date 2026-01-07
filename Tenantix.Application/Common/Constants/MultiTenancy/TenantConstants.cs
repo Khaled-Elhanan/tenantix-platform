@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Tenantix.Application.Common.Constants.Tenancy
+namespace Tenantix.Application.Common.Constants.MultiTenancy
 {
     public static class TenancyConstants
     {

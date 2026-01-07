@@ -19,7 +19,7 @@ namespace Tenantix.Infrastructure.Persistence.Context
             builder.Ignore<ApplicationTenantInfo>();
         }
         public DbSet<Tenant> Tenants => Set<Tenant>();
-        public DbSet<Tenantix.Domain.Entities.Product> Products => Set<Tenantix.Domain.Entities.Product>();
+        public DbSet<Product> Products => Set<Product>();
            
            
         

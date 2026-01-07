@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Tenantix.Application.Common.Constants.MultiTenancy;
 
 namespace Tenantix.Infrastructure.MultiTenancy.Models
 {
@@ -20,6 +21,6 @@ namespace Tenantix.Infrastructure.MultiTenancy.Models
         public string? CompanyName { get; set; }
         public bool IsActive { get; set; }
         public DateTime ValidUpTo { get; set; }
-        public string TenantType { get; set; } = Tenantix.Application.Common.Constants.Tenancy.TenancyConstants.TenantTypes.Store;
+        public string TenantType { get; set; } = TenancyConstants.TenantTypes.Store;
     }
 }

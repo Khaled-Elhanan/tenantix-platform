@@ -3,7 +3,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using System.Text.RegularExpressions;
 using Tenantix.Application.Common.Constants.Authorization;
-using Tenantix.Application.Common.Constants.Tenancy;
+using Tenantix.Application.Common.Constants.MultiTenancy;
 using Tenantix.Infrastructure.Identity.Models;
 using Tenantix.Infrastructure.MultiTenancy.Models;
 using Tenantix.Infrastructure.Persistence.Context;

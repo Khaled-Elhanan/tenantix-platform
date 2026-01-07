@@ -17,7 +17,6 @@ using System.Security.Claims;
 using System.Text;
 using Tenantix.Application;
 using Tenantix.Application.Common.Constants.Authorization;
-using Tenantix.Application.Common.Constants.Tenancy;
 using Tenantix.Infrastructure.Identity.Auth;
 using Tenantix.Infrastructure.Identity.Models;
 using Tenantix.Shared.Responses;
@@ -32,6 +31,7 @@ using Tenantix.Infrastructure.MultiTenancy.Models;
 using Tenantix.Infrastructure.MultiTenancy.Persistence;
 using Tenantix.Infrastructure.MultiTenancy.Seeders;
 using Tenantix.Infrastructure.MultiTenancy.Services;
+using Tenantix.Application.Common.Constants.MultiTenancy;
 using Tenantix.Infrastructure.Products.Services;
 
 namespace Tenantix.Infrastructure;

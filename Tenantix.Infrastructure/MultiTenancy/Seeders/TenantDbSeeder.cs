@@ -3,7 +3,7 @@ using Finbuckle.MultiTenant.Abstractions;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using Tenantix.Application.Common.Constants.Tenancy;
+using Tenantix.Application.Common.Constants.MultiTenancy;
 using Tenantix.Infrastructure.MultiTenancy.Models;
 using Tenantix.Infrastructure.MultiTenancy.Persistence;
 

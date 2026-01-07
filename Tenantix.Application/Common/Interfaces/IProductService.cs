@@ -9,6 +9,6 @@ namespace Tenantix.Application.Common.Interfaces
 {
     public interface IProductService
     {
-        Task<Guid> CreateAsync(CreateProductRequest reuqest, CancellationToken cancellationToken);
+        Task<Guid> CreateAsync(CreateProductRequest request, CancellationToken cancellationToken);
     }
 }

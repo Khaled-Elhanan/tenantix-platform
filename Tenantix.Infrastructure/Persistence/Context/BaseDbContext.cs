@@ -43,15 +43,10 @@ namespace Tenantix.Infrastructure.Persistence.Context
             }
         }
 
-        /// <summary>
-        /// Ensure all added entities that derive from <see cref="TenantEntity"/> have their
-        /// <c>TenantId</c> set from the current <see cref="ApplicationTenantInfo"/>.
-        /// This keeps tenant assignment in the infrastructure layer and out of domain/application code.
-        /// </summary>
+      
         private void ApplyTenantIds()
         {
-            // If there is no resolved tenant, don't silently assign anything.
-            // You might choose to throw here instead, depending on your requirements.
+        
             var currentTenantId = TenantInfo?.Id;
             if (string.IsNullOrWhiteSpace(currentTenantId))
             {

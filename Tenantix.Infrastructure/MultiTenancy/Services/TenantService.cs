@@ -8,6 +8,7 @@ using Tenantix.Shared.Exceptions;
 using Mapster;
 using Tenantix.Application.Common.Interfaces;
 using Tenantix.Infrastructure.MultiTenancy.Models;
+using Tenantix.Application.Common.Constants.MultiTenancy;
 namespace Tenantix.Infrastructure.MultiTenancy.Services
 {
     public class TenantService : ITenantService
@@ -68,7 +69,7 @@ namespace Tenantix.Infrastructure.MultiTenancy.Services
                 Name = createTenant.Name,
                 ConnectionString = connectionString,
                 OwnerEmail = createTenant.AdminEmail,
-                TenantType = Tenantix.Application.Common.Constants.Tenancy.TenancyConstants.TenantTypes.Store,
+                TenantType = TenancyConstants.TenantTypes.Store,
                 ValidUpTo = createTenant.ValidUpTo == default ? DateTime.UtcNow.AddYears(1) : createTenant.ValidUpTo
             };
 
