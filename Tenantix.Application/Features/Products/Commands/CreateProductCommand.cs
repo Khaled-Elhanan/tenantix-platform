@@ -1,10 +1,11 @@
-﻿using MediatR;
+﻿using Application.Pipelines;
+using MediatR;
 using Tenantix.Application.Common.Interfaces;
 using Tenantix.Shared.Responses;
 
 namespace Tenantix.Application.Features.Products.Commands
 {
-    public class CreateProductCommand : IRequest<IResponseWrapper>
+    public class CreateProductCommand : IRequest<IResponseWrapper> ,IValidateMe
     {
         public CreateProductRequest CreateProduct { get; set; } = default!;
     }
