@@ -7,7 +7,11 @@ public class CreateTenantRequest
 
     public string? ConnectionString { get; set; }
 
-    public string AdminEmail { get; set; } 
+    public string OwnerEmail { get; set; } 
+
+    public string? CompanyName { get; set; }
+
+        
 
 
 

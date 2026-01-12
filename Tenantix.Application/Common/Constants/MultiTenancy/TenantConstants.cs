@@ -13,7 +13,7 @@ namespace Tenantix.Application.Common.Constants.MultiTenancy
 
         public static class TenantTypes
         {
-            public const string Root = "Root";
+            public const string Platform = "Platform";
             public const string Store = "Store";
         }
 

@@ -48,7 +48,7 @@ public class ApplicationDbSeeder
         var tenantId = tenant.Identifier
             ?? throw new InvalidOperationException("Tenant identifier is missing.");
 
-        var roles = tenant.TenantType == TenancyConstants.TenantTypes.Root
+        var roles = tenant.TenantType == TenancyConstants.TenantTypes.Platform
             ? new[]
             {
                 ("Owner", PlatformPermissions.Owner.Cast<object>().ToList()),
@@ -132,7 +132,7 @@ public class ApplicationDbSeeder
         if (tenant == null) return;
 
         // Skip seeding store owner for platform tenant.
-        if (tenant.TenantType == TenancyConstants.TenantTypes.Root)
+        if (tenant.TenantType == TenancyConstants.TenantTypes.Platform)
         {
             return;
         }

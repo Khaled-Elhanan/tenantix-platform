@@ -6,7 +6,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Tenantix.Application.Common.Constants.MultiTenancy;
 using Tenantix.Infrastructure.MultiTenancy.Models;
 using Tenantix.Infrastructure.MultiTenancy.Persistence;
-
+using Tenantix.Application.Common.Constants.MultiTenancy;
 namespace Tenantix.Infrastructure.MultiTenancy.Seeders
 {
     public class TenantDbSeeder : ITenantDbSeeder
@@ -35,7 +35,11 @@ namespace Tenantix.Infrastructure.MultiTenancy.Seeders
 
             foreach (var tenant in tenants)
             {
-                await InitializeApplicationDbForTenantAsync(tenant, cancellationToken);
+                if (tenant.TenantType == TenancyConstants.TenantTypes.Store)
+                {
+                    await InitializeApplicationDbForTenantAsync(tenant, cancellationToken);
+                }
+               
             }
         }
 
@@ -62,7 +66,7 @@ namespace Tenantix.Infrastructure.MultiTenancy.Seeders
                     CompanyName = "System",
                     ConnectionString = defaultConnectionString,
                     IsActive = true,
-                    TenantType = TenancyConstants.TenantTypes.Root,
+                    TenantType = TenancyConstants.TenantTypes.Platform,
                     ValidUpTo = DateTime.UtcNow.AddYears(
                         TenancyConstants.DefaultTenantValidityInYears)
                 };
@@ -83,7 +87,7 @@ namespace Tenantix.Infrastructure.MultiTenancy.Seeders
 
                 if (string.IsNullOrWhiteSpace(rootTenant.TenantType))
                 {
-                    rootTenant.TenantType = TenancyConstants.TenantTypes.Root;
+                    rootTenant.TenantType = TenancyConstants.TenantTypes.Platform;
                     updated = true;
                 }
 

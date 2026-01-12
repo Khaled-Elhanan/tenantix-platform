@@ -68,7 +68,8 @@ namespace Tenantix.Infrastructure.MultiTenancy.Services
                 IsActive = createTenant.IsActive,
                 Name = createTenant.Name,
                 ConnectionString = connectionString,
-                OwnerEmail = createTenant.AdminEmail,
+                OwnerEmail = createTenant.OwnerEmail,
+                CompanyName=createTenant.CompanyName,
                 TenantType = TenancyConstants.TenantTypes.Store,
                 ValidUpTo = createTenant.ValidUpTo == default ? DateTime.UtcNow.AddYears(1) : createTenant.ValidUpTo
             };

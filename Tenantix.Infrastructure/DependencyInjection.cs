@@ -203,7 +203,7 @@ public static class DependencyInjection
 
                 options.AddPolicy(TenancyConstants.TenantPolicies.PlatformTenantOnly,
                     policy => policy.Requirements.Add(
-                        new TenantTypeRequirement(TenancyConstants.TenantTypes.Root)));
+                        new TenantTypeRequirement(TenancyConstants.TenantTypes.Platform)));
             });
         return services;
     }
