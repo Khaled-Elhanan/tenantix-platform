@@ -14,5 +14,7 @@ namespace Tenantix.Application.Common.Interfaces
         Task<PagedResponse<ProductListItemResponse>> GetPagedAsync(int page , int pageSize, CancellationToken cancellationToken);
 
         Task<ProductResponse?> GetByIdAsync(Guid id, CancellationToken cancellationToken);
+        Task<bool> UpdateAsync(Guid id,UpdateProductRequest request,CancellationToken cancellationToken);
+
     }
 }

@@ -62,6 +62,19 @@ namespace Tenantix.Infrastructure.Products.Services
 
             };
         }
-       
+
+        public async Task<bool> UpdateAsync(Guid id, UpdateProductRequest request, CancellationToken cancellationToken)
+        {
+            var product = await _context.Products.FirstOrDefaultAsync(x=>x.Id == id , cancellationToken);
+            if (product == null)
+            {
+                return false;
+            }
+            product.Name = request.Name;
+            product.Price = request.Price;
+            product.Stock = request.Stock;
+            await _context.SaveChangesAsync(cancellationToken);
+            return true;
+        }
     }
 }

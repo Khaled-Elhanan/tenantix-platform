@@ -53,6 +53,15 @@ namespace Tenantix_WebApi.Controllers
 
             return NotFound(response);
         }
+
+        [HttpPut("{id:guid}")]
+        [ShouldHavePermission(StoreActions.Update , StoreFeatures.Products)]
+        public async Task <IActionResult> UpdateProductAsync(Guid id  , [FromBody] UpdateProductRequest request)
+        {
+            var response = await Sender.Send(new UpdateProductCommand { Id = id, Product = request });
+            if(response.IsSuccessful) return Ok(response);
+            else return NotFound(response);
+        }
     }
 
 }
