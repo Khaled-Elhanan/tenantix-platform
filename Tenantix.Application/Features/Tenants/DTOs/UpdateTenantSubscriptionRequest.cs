@@ -1,4 +1,4 @@
-namespace Tenantix.Application.Features.Tenancy;
+namespace Tenantix.Application.Features.Tenants.DTOs;
 
 public class UpdateTenantSubscriptionRequest
 {

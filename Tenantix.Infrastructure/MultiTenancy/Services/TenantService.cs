@@ -9,6 +9,7 @@ using Mapster;
 using Tenantix.Application.Common.Interfaces;
 using Tenantix.Infrastructure.MultiTenancy.Models;
 using Tenantix.Application.Common.Constants.MultiTenancy;
+using Tenantix.Application.Features.Tenants.DTOs;
 namespace Tenantix.Infrastructure.MultiTenancy.Services
 {
     public class TenantService : ITenantService

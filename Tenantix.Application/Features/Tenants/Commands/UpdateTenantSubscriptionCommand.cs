@@ -1,6 +1,7 @@
 using Tenantix.Shared.Responses;
 using MediatR;
 using Tenantix.Application.Common.Interfaces;
+using Tenantix.Application.Features.Tenants.DTOs;
 
 namespace Tenantix.Application.Features.Tenancy.Commands;
 

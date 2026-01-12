@@ -1,6 +1,7 @@
 ﻿using Application.Pipelines;
 using MediatR;
 using Tenantix.Application.Common.Interfaces;
+using Tenantix.Application.Features.Products.DTOs;
 using Tenantix.Shared.Responses;
 
 namespace Tenantix.Application.Features.Products.Commands

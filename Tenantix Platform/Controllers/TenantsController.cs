@@ -1,9 +1,9 @@
 ﻿using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Tenantix.Application.Common.Constants.Authorization;
-using Tenantix.Application.Features.Tenancy;
 using Tenantix.Application.Features.Tenancy.Commands;
 using Tenantix.Application.Features.Tenancy.Queries;
+using Tenantix.Application.Features.Tenants.DTOs;
 using Tenantix.Infrastructure.Identity.Auth;
 
 namespace Tenantix_WebApi.Controllers

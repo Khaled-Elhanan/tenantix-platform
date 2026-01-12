@@ -1,4 +1,5 @@
 using Tenantix.Application.Features.Tenancy;
+using Tenantix.Application.Features.Tenants.DTOs;
 
 namespace Tenantix.Application.Common.Interfaces;
 
