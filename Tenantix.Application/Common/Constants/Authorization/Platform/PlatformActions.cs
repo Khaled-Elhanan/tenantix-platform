@@ -1,4 +1,4 @@
-namespace Tenantix.Application.Common.Constants.Authorization
+namespace Tenantix.Application.Common.Constants.Authorization.Platform
 {
     public static class PlatformActions
     {

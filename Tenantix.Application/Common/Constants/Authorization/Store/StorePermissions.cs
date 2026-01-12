@@ -1,4 +1,4 @@
-﻿namespace Tenantix.Application.Common.Constants.Authorization;
+﻿namespace Tenantix.Application.Common.Constants.Authorization.Store;
 
 public static class StorePermissions
 {
@@ -26,6 +26,12 @@ public static class StorePermissions
         new(StoreActions.Update, StoreFeatures.Products, "Update products", "Catalog"),
         new(StoreActions.Delete, StoreFeatures.Products, "Delete products", "Catalog"),
 
+        // ========= CUSTOMERS =========
+        new(StoreActions.Read, StoreFeatures.Customers, "View customers", "Customers"),
+        new(StoreActions.Create, StoreFeatures.Customers, "Create customers", "Customers"),
+        new(StoreActions.Update, StoreFeatures.Customers, "Update customers", "Customers"),
+        new(StoreActions.Delete, StoreFeatures.Customers, "Delete customers", "Customers"),
+
         // ========= ORDERS =========
         new(StoreActions.Read, StoreFeatures.Orders, "View orders", "Orders"),
         new(StoreActions.Update, StoreFeatures.Orders, "Update order status", "Orders"),
@@ -34,8 +40,8 @@ public static class StorePermissions
         new(StoreActions.Manage, StoreFeatures.Staff, "Manage staff", "Staff", OwnerOnly: true),
 
         // ========= BILLING =========
-        new(StoreActions.Manage, StoreFeatures.Billing, "Manage billing", "Billing", OwnerOnly: true),
-        new(StoreActions.Upgrade, StoreFeatures.Billing, "Upgrade subscription", "Billing", OwnerOnly: true),
+       // new(StoreActions.Manage, StoreFeatures.Billing, "Manage billing", "Billing", OwnerOnly: true),
+       // new(StoreActions.Upgrade, StoreFeatures.Billing, "Upgrade subscription", "Billing", OwnerOnly: true),
     };
 
     public static IReadOnlyList<StorePermission> All => _all;

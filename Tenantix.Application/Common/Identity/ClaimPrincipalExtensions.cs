@@ -4,8 +4,7 @@ using System.Linq;
 using System.Security.Claims;
 using System.Text;
 using System.Threading.Tasks;
-
-using Tenantix.Application.Common.Constants.Authorization;
+using Tenantix.Application.Common.Constants.Authorization.Common;
 
 namespace Tenantix.Application.Common.Identity
 {

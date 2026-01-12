@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using Tenantix.Application.Common.Constants.Authorization;
+using Tenantix.Application.Common.Constants.Authorization.Store;
 
 namespace Tenantix.Infrastructure.Identity.Auth
 {

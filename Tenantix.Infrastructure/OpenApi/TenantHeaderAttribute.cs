@@ -1,4 +1,4 @@
-﻿using Tenantix.Application.Common.Constants.Authorization;
+﻿using Tenantix.Application.Common.Constants.Authorization.Common;
 
 namespace Infrastructure.OpenApi;
 

@@ -1,5 +1,5 @@
 ﻿using System.Security.Claims;
-using Tenantix.Application.Common.Constants.Authorization;
+using Tenantix.Application.Common.Constants.Authorization.Common;
 
 namespace Tenantix.Application.Features.Identity
 

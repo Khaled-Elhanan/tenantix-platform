@@ -20,6 +20,7 @@ namespace Tenantix.Infrastructure.Persistence.Context
         }
         public DbSet<Tenant> Tenants => Set<Tenant>();
         public DbSet<Product> Products => Set<Product>();
+        public DbSet<Customer> Customers => Set<Customer>();
            
            
         

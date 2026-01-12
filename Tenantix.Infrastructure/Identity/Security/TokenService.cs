@@ -7,7 +7,6 @@ using System.Security.Claims;
 using System.Security.Cryptography;
 using System.Text;
 using Tenantix.Application;
-using Tenantix.Application.Common.Constants.Authorization;
 using Tenantix.Application.Common.Constants.MultiTenancy;
 using Tenantix.Infrastructure.Identity.Models;
 using Tenantix.Shared.Exceptions;
@@ -15,6 +14,7 @@ using Tenantix.Application.Common.Interfaces;
 using Tenantix.Application.Common.Identity.Tokens;
 using Tenantix.Application.Common.Identity;
 using Tenantix.Infrastructure.MultiTenancy.Models;
+using Tenantix.Application.Common.Constants.Authorization.Common;
 
 namespace Tenantix.Infrastructure.Identity.Security;
 

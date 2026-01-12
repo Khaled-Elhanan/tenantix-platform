@@ -1,7 +1,7 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using System.Linq;
 using System.Threading.Tasks;
-using Tenantix.Application.Common.Constants.Authorization;
+using Tenantix.Application.Common.Constants.Authorization.Common;
 
 namespace Tenantix.Infrastructure.Identity.Auth;
 

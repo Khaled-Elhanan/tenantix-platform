@@ -1,6 +1,6 @@
 ﻿using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using Tenantix.Application.Common.Constants.Authorization;
+using Tenantix.Application.Common.Constants.Authorization.Store;
 using Tenantix.Application.Features.Products.Commands;
 using Tenantix.Application.Features.Products.DTOs;
 using Tenantix.Application.Features.Products.Queries;

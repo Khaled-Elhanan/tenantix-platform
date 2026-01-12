@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Tenantix.Application.Common.Constants.Authorization
+namespace Tenantix.Application.Common.Constants.Authorization.Common
 {
     public static class ClaimConstants
     {

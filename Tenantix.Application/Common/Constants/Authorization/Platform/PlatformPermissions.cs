@@ -1,3 +1,5 @@
+using Tenantix.Application.Common.Constants.Authorization.Platform;
+
 namespace Tenantix.Application.Common.Constants.Authorization;
 
 public static class PlatformPermissions
