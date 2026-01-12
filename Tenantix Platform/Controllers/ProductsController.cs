@@ -62,6 +62,15 @@ namespace Tenantix_WebApi.Controllers
             if(response.IsSuccessful) return Ok(response);
             else return NotFound(response);
         }
+        [HttpDelete("{id:guid}")]
+        [ShouldHavePermission(StoreActions.Delete,StoreFeatures.Products)]
+        public async Task<IActionResult> DeleteProductAsync(Guid id)
+        {
+            var response = await Sender.Send(new DeleteProductCommand { Id = id });
+            if (response.IsSuccessful) return Ok(response);
+            else return NotFound(response); 
+        }
     }
+
 
 }

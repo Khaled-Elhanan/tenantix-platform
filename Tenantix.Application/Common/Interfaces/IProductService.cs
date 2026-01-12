@@ -15,6 +15,7 @@ namespace Tenantix.Application.Common.Interfaces
 
         Task<ProductResponse?> GetByIdAsync(Guid id, CancellationToken cancellationToken);
         Task<bool> UpdateAsync(Guid id,UpdateProductRequest request,CancellationToken cancellationToken);
+        Task<bool> DeleteAsync(Guid id,CancellationToken cancellationToken);
 
     }
 }

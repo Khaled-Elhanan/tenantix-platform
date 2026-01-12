@@ -23,6 +23,8 @@ namespace Tenantix.Infrastructure.Products.Services
             return product.Id;
         }
 
+     
+
         public async Task<ProductResponse?> GetByIdAsync(Guid id, CancellationToken cancellationToken)
         {
             var product= await _context.Products.AsNoTracking().FirstOrDefaultAsync(x => x.Id == id,cancellationToken);
@@ -75,6 +77,19 @@ namespace Tenantix.Infrastructure.Products.Services
             product.Stock = request.Stock;
             await _context.SaveChangesAsync(cancellationToken);
             return true;
+        }
+
+
+        public async Task<bool> DeleteAsync(Guid id,  CancellationToken cancellationToken)
+        {
+            var product = await _context.Products.FirstOrDefaultAsync(x => x.Id == id, cancellationToken);
+            if (product == null)
+            {
+                return false;   
+            }
+            product.IsActive = false;
+            await _context.SaveChangesAsync(cancellationToken);
+            return true;    
         }
     }
 }
