@@ -59,6 +59,35 @@ namespace Tenantix_WebApi.Controllers
             return NotFound(response);
         }
 
+        [HttpPut("{id:guid}")]
+        [ShouldHavePermission(StoreActions.Update, StoreFeatures.Customers)]
+        public async Task<IActionResult> UpdateCustomerAsync(
+            Guid id,
+            [FromBody] UpdateCustomerRequest request)
+        {
+            var response = await Sender.Send(new UpdateCustomerCommand
+            {
+                Id = id,
+                Customer = request
+            });
+            if (response.IsSuccessful)
+                return Ok(response);
+            return BadRequest(response);
+        }
+
+        [HttpDelete("{id:guid}")]
+        [ShouldHavePermission(StoreActions.Delete, StoreFeatures.Customers)]
+        public async Task<IActionResult> DeleteCustomerAsync(Guid id)
+        {
+            var response = await Sender.Send(new DeleteCustomerCommand
+            {
+                Id = id
+            });
+            if (response.IsSuccessful)
+                return Ok(response);
+            return BadRequest(response);
+        }
+
 
     }
 }

@@ -10,7 +10,7 @@ namespace Tenantix.Application.Features.Products.Validations
         {
             RuleFor(x => x.CreateProduct)
                 .NotNull()
-                .SetValidator(new CreateProductRequestValidator());
+                .SetValidator(new CreateTenantRequestValidator());
         }
     }
 }

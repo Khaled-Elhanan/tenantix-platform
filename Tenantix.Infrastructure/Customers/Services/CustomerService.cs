@@ -25,6 +25,8 @@ namespace Tenantix.Infrastructure.Customers.Services
 
         }
 
+     
+
         public async Task<CustomerResponse?> GetByIdAsync(Guid id, CancellationToken cancellationToken)
         {
             return await _context.Customers
@@ -69,5 +71,36 @@ namespace Tenantix.Infrastructure.Customers.Services
             };
 
         }
+
+        public async Task<bool> UpdateAsync(Guid id, UpdateCustomerRequest request, CancellationToken cancellationToken)
+        {
+            var customer = await _context.Customers.FirstOrDefaultAsync(x => x.Id == id, cancellationToken);
+            if (customer == null)
+            {
+                return false;
+            }
+            customer.FirstName = request.FirstName;
+            customer.LastName = request.LastName;
+            customer.Email = request.Email;
+            customer.Phone = request.Phone;
+            await _context.SaveChangesAsync(cancellationToken);
+            return true;
+           
+
+        }
+
+        public async Task<bool> DeleteAsync(Guid id, CancellationToken cancellationToken)
+        {
+           var customer = await _context.Customers.FirstOrDefaultAsync(x => x.Id == id, cancellationToken);
+            if (customer == null)
+            {
+                return false;
+            }
+            customer.IsActive = false;
+            await _context.SaveChangesAsync(cancellationToken);
+            return true;
+        }
+
+       
     }
     }
