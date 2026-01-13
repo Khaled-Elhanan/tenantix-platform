@@ -8,9 +8,9 @@ using Tenantix.Application.Features.Products.DTOs;
 
 namespace Tenantix.Application.Features.Products.Validations
 {
-    public class CreateProductRequestValidator : AbstractValidator<CreateProductRequest>
+    public class CreateTenantRequestValidator : AbstractValidator<CreateProductRequest>
     {
-        public CreateProductRequestValidator()
+        public CreateTenantRequestValidator()
         {
             RuleFor(x => x.Name)
                  .NotEmpty()

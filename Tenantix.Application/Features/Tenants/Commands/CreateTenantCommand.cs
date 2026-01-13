@@ -2,11 +2,12 @@
 using MediatR;
 using Tenantix.Application.Common.Interfaces;
 using Tenantix.Application.Features.Tenants.DTOs;
+using Tenantix.Application.Pipelines;
 using Tenantix.Shared.Responses;
 
 namespace Tenantix.Application.Features.Tenancy.Commands;
 
-public class CreateTenantCommand: IRequest<IResponseWrapper>
+public class CreateTenantCommand: IRequest<IResponseWrapper> , IValidateMe
 {
     public   CreateTenantRequest CreateTenant { get; set; }
 }

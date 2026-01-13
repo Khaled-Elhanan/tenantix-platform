@@ -3,10 +3,10 @@ using Tenantix.Application.Features.Products.Commands;
 
 namespace Tenantix.Application.Features.Products.Validations
 {
-    public class CreateProductCommandValidator
+    public class CreateTenantCommandValidator
         : AbstractValidator<CreateProductCommand>
     {
-        public CreateProductCommandValidator()
+        public CreateTenantCommandValidator()
         {
             RuleFor(x => x.CreateProduct)
                 .NotNull()

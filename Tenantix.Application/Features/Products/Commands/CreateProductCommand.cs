@@ -1,4 +1,4 @@
-﻿using Application.Pipelines;
+﻿using Tenantix.Application.Pipelines;
 using MediatR;
 using Tenantix.Application.Common.Interfaces;
 using Tenantix.Application.Features.Products.DTOs;

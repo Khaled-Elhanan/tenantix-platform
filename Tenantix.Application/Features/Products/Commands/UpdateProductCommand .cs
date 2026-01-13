@@ -1,4 +1,4 @@
-﻿using Application.Pipelines;
+﻿using Tenantix.Application.Pipelines;
 using MediatR;
 using System;
 using System.Collections.Generic;

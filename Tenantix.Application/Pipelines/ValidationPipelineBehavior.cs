@@ -3,7 +3,6 @@ using MediatR;
 
 namespace Tenantix.Application.Pipelines;
 
-public interface IValidateMe { }
 
 public class ValidationPipelineBehavior<TRequest, TResponse>
     : IPipelineBehavior<TRequest, TResponse>
