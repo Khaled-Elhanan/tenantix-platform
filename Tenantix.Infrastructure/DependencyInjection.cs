@@ -55,8 +55,9 @@ public static class DependencyInjection
             .AddDbContext<TenantDbContext>(options =>
             options.UseSqlServer(config.GetConnectionString("DefaultConnection"), o => o.EnableRetryOnFailure()))
             .AddMultiTenant<ApplicationTenantInfo>()
-            .WithHeaderStrategy(ClaimConstants.Tenant)
             .WithClaimStrategy(ClaimConstants.Tenant)
+            .WithHeaderStrategy(ClaimConstants.Tenant)
+            
             .WithEFCoreStore<TenantDbContext, ApplicationTenantInfo>()
             .Services
             .AddDbContext<ApplicationDbContext>(options =>

@@ -248,7 +248,7 @@ public class TokenService : ITokenService
                 new Claim(ClaimTypes.Email, user.Email ?? string.Empty),
                 new Claim(ClaimTypes.Name, user.FirstName ?? string.Empty),
                 new Claim(ClaimTypes.Surname, user.LastName ?? string.Empty),
-                new Claim(ClaimConstants.Tenant, _tenantContextAccessor.MultiTenantContext?.TenantInfo?.Id ?? string.Empty),
+                new Claim(ClaimConstants.Tenant, _tenantContextAccessor.MultiTenantContext?.TenantInfo?.Identifier ?? string.Empty),
                 new Claim(ClaimConstants.TenantType, _tenantContextAccessor.MultiTenantContext?.TenantInfo?.TenantType ?? string.Empty),
                 new Claim(ClaimTypes.MobilePhone, user.PhoneNumber ?? string.Empty)
             }.Union(roleClaims)

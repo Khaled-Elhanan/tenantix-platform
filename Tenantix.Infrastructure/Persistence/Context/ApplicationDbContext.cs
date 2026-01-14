@@ -18,7 +18,7 @@ namespace Tenantix.Infrastructure.Persistence.Context
             base.OnModelCreating(builder);
             builder.Ignore<ApplicationTenantInfo>();
         }
-        public DbSet<Tenant> Tenants => Set<Tenant>();
+        
         public DbSet<Product> Products => Set<Product>();
         public DbSet<Customer> Customers => Set<Customer>();
            
