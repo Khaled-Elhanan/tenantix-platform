@@ -10,5 +10,5 @@ namespace Tenantix.Domain.Common
     {
         public string TenantId { get; set; }   = default!;
         public bool IsActive { get; set; } = true;
-    }
+    }                  
 }

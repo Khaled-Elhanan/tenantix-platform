@@ -46,7 +46,7 @@ namespace Tenantix.Infrastructure.Products.Services
         {
             var query = _context.Products.AsNoTracking().OrderByDescending(x => x.CreatedAt);
             var totalCount = await query.CountAsync(cancellationToken);
-            var items = await query.Skip(page - 1).Take(pageSize)
+            var items = await query.Skip((page - 1) * pageSize).Take(pageSize)
                 .Select(x => new ProductListItemResponse
                 {
                     Id = x.Id,
