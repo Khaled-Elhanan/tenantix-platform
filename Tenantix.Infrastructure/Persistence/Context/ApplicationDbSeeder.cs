@@ -31,12 +31,17 @@ public class ApplicationDbSeeder
 
     public async Task InitializeDatabaseAsync(CancellationToken cancellationToken)
     {
-        var pending = await _context.Database.GetPendingMigrationsAsync(cancellationToken);
-        if (pending.Any())
-            await _context.Database.MigrateAsync(cancellationToken);
+        await RunMigrationsAsync(cancellationToken);
 
         await InitializeRolesAsync(cancellationToken);
         await InitializeOwnerUserAsync(cancellationToken);
+    }
+
+    protected virtual async Task RunMigrationsAsync(CancellationToken cancellationToken)
+    {
+        var pending = await _context.Database.GetPendingMigrationsAsync(cancellationToken);
+        if (pending.Any())
+            await _context.Database.MigrateAsync(cancellationToken);
     }
 
     // =========================================================

@@ -27,7 +27,11 @@ var app = builder.Build();
 // =====================
 // Initialize databases
 // =====================
-await app.Services.AddDatabaseInitializerAsync();
+if (!app.Environment.IsEnvironment("Test"))
+{
+    await app.Services.AddDatabaseInitializerAsync();
+}
+
 
 // =====================
 // Middleware pipeline
@@ -42,3 +46,5 @@ app.UseHttpsRedirection();
 app.MapControllers();
 
 app.Run();
+
+public partial class Program { }

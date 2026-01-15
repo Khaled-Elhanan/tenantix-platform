@@ -39,7 +39,7 @@ namespace Tenantix.Infrastructure.MultiTenancy.Seeders
                 {
                     await InitializeApplicationDbForTenantAsync(tenant, cancellationToken);
                 }
-               
+
             }
         }
 
@@ -120,10 +120,10 @@ namespace Tenantix.Infrastructure.MultiTenancy.Seeders
                 };
 
 
-                    await scope.ServiceProvider
-                    .GetRequiredService<ApplicationDbSeeder>()
-                    .InitializeDatabaseAsync(cancellationToken);
-                                                                                                         
+            await scope.ServiceProvider
+            .GetRequiredService<ApplicationDbSeeder>()
+            .InitializeDatabaseAsync(cancellationToken);
+
         }
     }
 }
