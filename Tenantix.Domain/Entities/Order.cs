@@ -15,6 +15,7 @@ namespace Tenantix.Domain.Entities
         public OrderStatus Status { get; set; } = OrderStatus.Pending;
 
         public decimal TotalAmount { get; set; }
+        public string OrderNumber { get; set; }
 
         public string? Notes { get; set; }
 
