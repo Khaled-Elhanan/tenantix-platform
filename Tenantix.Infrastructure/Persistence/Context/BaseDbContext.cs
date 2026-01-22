@@ -1,9 +1,7 @@
-﻿using Finbuckle.MultiTenant;
-using Finbuckle.MultiTenant.Abstractions;
+﻿using Finbuckle.MultiTenant.Abstractions;
 using Finbuckle.MultiTenant.EntityFrameworkCore;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
-using System.Linq.Expressions;
 using System.Reflection;
 using Tenantix.Domain.Common;
 using Tenantix.Infrastructure.Identity.Models;
@@ -12,7 +10,7 @@ using Tenantix.Infrastructure.MultiTenancy.Models;
 namespace Tenantix.Infrastructure.Persistence.Context
 {
     public abstract class BaseDbContext
-        : MultiTenantIdentityDbContext<ApplicationUser, 
+        : MultiTenantIdentityDbContext<ApplicationUser,
             ApplicationRole, string,
             IdentityUserClaim<string>,
             IdentityUserRole<string>,
@@ -20,7 +18,7 @@ namespace Tenantix.Infrastructure.Persistence.Context
             ApplicationRoleClaim,
             IdentityUserToken<string>>
     {
-        private new ApplicationTenantInfo? TenantInfo { get; set; }
+        private new ApplicationTenantInfo? TenantInfo { get; }
 
         protected BaseDbContext(
             IMultiTenantContextAccessor<ApplicationTenantInfo> tenantContextAccessor,
@@ -34,8 +32,6 @@ namespace Tenantix.Infrastructure.Persistence.Context
         {
             base.OnConfiguring(optionsBuilder);
 
-           
-
             if (!string.IsNullOrWhiteSpace(TenantInfo?.ConnectionString))
             {
                 optionsBuilder.UseSqlServer(
@@ -44,26 +40,19 @@ namespace Tenantix.Infrastructure.Persistence.Context
             }
         }
 
-      
         private void ApplyTenantIds()
         {
-        
             var currentTenantId = TenantInfo?.Identifier;
             if (string.IsNullOrWhiteSpace(currentTenantId))
-            {
                 return;
-            }
 
             var entries = ChangeTracker.Entries<TenantEntity>()
                 .Where(e => e.State == EntityState.Added);
 
             foreach (var entry in entries)
             {
-                // Only set TenantId if the entity hasn't explicitly set it.
                 if (string.IsNullOrWhiteSpace(entry.Entity.TenantId))
-                {
                     entry.Entity.TenantId = currentTenantId!;
-                }
             }
         }
 
@@ -82,18 +71,15 @@ namespace Tenantix.Infrastructure.Persistence.Context
         protected override void OnModelCreating(ModelBuilder builder)
         {
             base.OnModelCreating(builder);
+
             builder.ApplyConfigurationsFromAssembly(GetType().Assembly);
-            // Apply global tenant filters AFTER configurations to ensure they are not overridden
-            ApplyGlobalTenantFilters(builder);
+
+            
+            ApplyIsActiveFilter(builder);
         }
-        private void ApplyGlobalTenantFilters(ModelBuilder builder)
+
+        private static void ApplyIsActiveFilter(ModelBuilder builder)
         {
-            var tenantIdentifier = TenantInfo?.Identifier;
-
-           
-            if (string.IsNullOrWhiteSpace(tenantIdentifier))
-                return;
-
             foreach (var entityType in builder.Model.GetEntityTypes())
             {
                 var clrType = entityType.ClrType;
@@ -103,41 +89,24 @@ namespace Tenantix.Infrastructure.Persistence.Context
                     continue;
 
                 // e =>
-                var parameter = Expression.Parameter(clrType, "e");
-
-                // EF.Property<string>(e, "TenantId")
-                var tenantIdProp = Expression.Call(
-                    typeof(EF),
-                    nameof(EF.Property),
-                    new[] { typeof(string) },
-                    parameter,
-                    Expression.Constant(nameof(TenantEntity.TenantId))
-                );
+                var parameter = System.Linq.Expressions.Expression.Parameter(clrType, "e");
 
                 // EF.Property<bool>(e, "IsActive")
-                var isActiveProp = Expression.Call(
+                var isActiveProp = System.Linq.Expressions.Expression.Call(
                     typeof(EF),
                     nameof(EF.Property),
                     new[] { typeof(bool) },
                     parameter,
-                    Expression.Constant(nameof(TenantEntity.IsActive))
-                );
-
-                // EF.Property<string>(e,"TenantId") == tenantIdentifier
-                var tenantMatch = Expression.Equal(
-                    tenantIdProp,
-                    Expression.Constant(tenantIdentifier)
+                    System.Linq.Expressions.Expression.Constant(nameof(TenantEntity.IsActive))
                 );
 
                 // EF.Property<bool>(e,"IsActive") == true
-                var activeMatch = Expression.Equal(
+                var body = System.Linq.Expressions.Expression.Equal(
                     isActiveProp,
-                    Expression.Constant(true)
+                    System.Linq.Expressions.Expression.Constant(true)
                 );
 
-                var body = Expression.AndAlso(tenantMatch, activeMatch);
-
-                var lambda = Expression.Lambda(body, parameter);
+                var lambda = System.Linq.Expressions.Expression.Lambda(body, parameter);
 
                 builder.Entity(clrType).HasQueryFilter(lambda);
             }
