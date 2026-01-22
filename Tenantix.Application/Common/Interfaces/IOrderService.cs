@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Tenantix.Application.Features.Orders.DTOs;
+using Tenantix.Domain.Enums;
 using Tenantix.Shared.Models;
 
 namespace Tenantix.Application.Common.Interfaces
@@ -13,5 +14,8 @@ namespace Tenantix.Application.Common.Interfaces
         Task<Guid> CreateAsync(CreateOrderRequest request, CancellationToken cancellationToken);
         Task<PagedResponse<OrderListItemResponse>> GetPagedAsync(int page , int pageSize , CancellationToken cancellationToken);
         Task<OrderResponse?> GetByIdAsync(Guid id, CancellationToken cancellationToken);
+        Task<bool> CancelAsync(Guid id, CancellationToken cancellationToken);
+
+        Task<bool> UpdateStatusAsync(Guid id, OrderStatus status, CancellationToken cancellationToken);
     }
 }

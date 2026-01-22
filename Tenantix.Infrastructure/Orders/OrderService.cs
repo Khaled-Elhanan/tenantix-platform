@@ -2,6 +2,7 @@
 using Tenantix.Application.Common.Interfaces;
 using Tenantix.Application.Features.Orders.DTOs;
 using Tenantix.Domain.Entities;
+using Tenantix.Domain.Enums;
 using Tenantix.Infrastructure.Persistence.Context;
 using Tenantix.Shared.Models;
 
@@ -14,6 +15,9 @@ namespace Tenantix.Infrastructure.Orders
         {
             _context = context;
         }
+
+      
+
         public async Task<Guid> CreateAsync(CreateOrderRequest request, CancellationToken cancellationToken)
         {
             // 1) validate customer exists
@@ -145,6 +149,26 @@ namespace Tenantix.Infrastructure.Orders
                 PageSize = pageSize
             };
 
+        }
+        public async Task<bool> CancelAsync(Guid id, CancellationToken cancellationToken)
+        {
+            var order = await _context.Orders.FirstOrDefaultAsync(o=>o.Id== id && o.IsActive, cancellationToken);
+            if (order is null) return false;
+            order.Status=OrderStatus.Cancelled;
+            order.IsActive= false;
+            await _context.SaveChangesAsync(cancellationToken);
+            return true;
+        }  
+
+        public async Task<bool> UpdateStatusAsync(Guid id, OrderStatus status, CancellationToken cancellationToken)
+        {
+            var order = await _context.Orders.
+                FirstOrDefaultAsync(o => o.Id == id && o.IsActive, cancellationToken);
+            if (order is null) return false;
+
+            order.Status = status;
+            await _context.SaveChangesAsync(cancellationToken);
+            return true;
         }
     }
 }
