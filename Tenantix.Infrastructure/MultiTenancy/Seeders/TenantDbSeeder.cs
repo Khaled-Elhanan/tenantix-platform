@@ -6,7 +6,6 @@ using Microsoft.Extensions.DependencyInjection;
 using Tenantix.Application.Common.Constants.MultiTenancy;
 using Tenantix.Infrastructure.MultiTenancy.Models;
 using Tenantix.Infrastructure.MultiTenancy.Persistence;
-using Tenantix.Application.Common.Constants.MultiTenancy;
 namespace Tenantix.Infrastructure.MultiTenancy.Seeders
 {
     public class TenantDbSeeder : ITenantDbSeeder

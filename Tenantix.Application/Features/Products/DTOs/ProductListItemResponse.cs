@@ -13,5 +13,8 @@ namespace Tenantix.Application.Features.Products.DTOs
         public decimal Price { get; init; }
         public int Stock { get; init; }
         public bool IsActive { get; init; }
+        public Guid? CategoryId { get; set; }
+        public string? CategoryName { get; set; }
+
     }
 }

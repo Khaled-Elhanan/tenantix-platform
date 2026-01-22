@@ -82,8 +82,9 @@ namespace Tenantix.Infrastructure.Persistence.Context
         protected override void OnModelCreating(ModelBuilder builder)
         {
             base.OnModelCreating(builder);
-            ApplyGlobalTenantFilters(builder);
             builder.ApplyConfigurationsFromAssembly(GetType().Assembly);
+            // Apply global tenant filters AFTER configurations to ensure they are not overridden
+            ApplyGlobalTenantFilters(builder);
         }
         private void ApplyGlobalTenantFilters(ModelBuilder builder)
         {

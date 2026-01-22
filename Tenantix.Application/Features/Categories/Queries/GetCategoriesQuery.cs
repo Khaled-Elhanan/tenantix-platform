@@ -11,7 +11,7 @@ namespace Tenantix.Application.Features.Categories.Queries
     {
         public int Page { get; set; }
         public int PageSize { get; set; }
-    }
+    }                                                              
     public class GetCategoriesQueryHandler : IRequestHandler<GetCategoriesQuery, IResponseWrapper>
     {
         private readonly ICategoryService _categoryService;

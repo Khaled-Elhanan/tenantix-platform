@@ -28,8 +28,14 @@ namespace Tenantix.Infrastructure.Persistence.Shared.Configurations.Core
             builder.HasIndex(x => new { x.TenantId, x.SKU })
                    .IsUnique();
 
-        
-            builder.HasQueryFilter(x => x.IsActive);
-        }
+            // Note: Query filter (TenantId + IsActive) is applied globally in BaseDbContext
+            // product & category
+            builder.Property(p => p.CategoryId);
+               
+            builder.HasOne<Category>()
+                .WithMany()
+                .HasForeignKey(p=>p.CategoryId)
+                .OnDelete(DeleteBehavior.Restrict);
+        }          
     }
 }

@@ -42,6 +42,8 @@ public static class StorePermissions
         // ========= ORDERS =========
         new(StoreActions.Read, StoreFeatures.Orders, "View orders", "Orders"),
         new(StoreActions.Update, StoreFeatures.Orders, "Update order status", "Orders"),
+        new(StoreActions.Delete, StoreFeatures.Orders, "Delete orders", "Orders"),
+        new(StoreActions.Create, StoreFeatures.Orders, "Create orders", "Orders"),
 
         // ========= STAFF =========
         new(StoreActions.Manage, StoreFeatures.Staff, "Manage staff", "Staff", OwnerOnly: true),

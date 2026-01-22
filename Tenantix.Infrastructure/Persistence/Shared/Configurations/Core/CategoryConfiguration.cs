@@ -23,8 +23,7 @@ namespace Tenantix.Infrastructure.Persistence.Shared.Configurations.Core
             builder.Property(c => c.DisplayOrder).HasMaxLength(500);
 
             builder.HasIndex(x => new { x.TenantId, x.Name }).IsUnique();
-            // For soft delete
-            builder.HasQueryFilter(x=>x.IsActive);
+            
         }
 
     }

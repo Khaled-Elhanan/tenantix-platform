@@ -13,6 +13,12 @@ namespace Tenantix.Domain.Entities
         public decimal Price { get; set; }
         public int Stock { get; set;  }
         public string SKU { get; set; }=default!;
+
+        public Guid? CategoryId { get; set; }
+
+        public Category? Category { get; set; }
+
+      
       
     }
 }
