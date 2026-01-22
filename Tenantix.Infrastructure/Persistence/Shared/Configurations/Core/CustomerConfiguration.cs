@@ -10,7 +10,7 @@ namespace Tenantix.Infrastructure.Persistence.Shared.Configurations.Core
     {
         public void Configure(EntityTypeBuilder<Customer> builder)
         {
-            builder.ToTable("Customers");
+            builder.ToTable("Customers", "Core");
 
             builder.HasKey(x => x.Id);
 

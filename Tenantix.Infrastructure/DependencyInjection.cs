@@ -37,6 +37,7 @@ using Tenantix.Infrastructure.Customers.Services;
 using Tenantix.Application.Common.Constants.Authorization.Store;
 using Tenantix.Application.Common.Constants.Authorization.Common;
 using Tenantix.Infrastructure.Orders;
+using Tenantix.Infrastructure.Categories.Services;
 
 namespace Tenantix.Infrastructure;
 
@@ -70,6 +71,7 @@ public static class DependencyInjection
             .AddTransient<IProductService, ProductService>()  
             .AddTransient<ICustomerService,CustomerService>()
             .AddTransient<IOrderService, OrderService>()
+            .AddTransient<ICategoryService, CategoryService>()
             .AddPermissions()
             .AddOpenApiDocumentation(config)
             .AddIdentityService();

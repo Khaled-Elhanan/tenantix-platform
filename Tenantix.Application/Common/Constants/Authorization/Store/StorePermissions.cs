@@ -26,6 +26,13 @@ public static class StorePermissions
         new(StoreActions.Update, StoreFeatures.Products, "Update products", "Catalog"),
         new(StoreActions.Delete, StoreFeatures.Products, "Delete products", "Catalog"),
 
+        // ========= CATEGORIES =========
+        new(StoreActions.Read, StoreFeatures.Categories, "View categories", "Catalog"),
+        new(StoreActions.Create, StoreFeatures.Categories, "Create categories", "Catalog"),
+        new(StoreActions.Update, StoreFeatures.Categories, "Update categories", "Catalog"),
+        new(StoreActions.Delete, StoreFeatures.Categories, "Delete categories", "Catalog"),
+
+
         // ========= CUSTOMERS =========
         new(StoreActions.Read, StoreFeatures.Customers, "View customers", "Customers"),
         new(StoreActions.Create, StoreFeatures.Customers, "Create customers", "Customers"),
@@ -54,7 +61,9 @@ public static class StorePermissions
 
     public static IReadOnlyList<StorePermission> Staff =>
         _all.Where(p =>
-            p.Feature is StoreFeatures.Products or StoreFeatures.Orders
+            p.Feature is StoreFeatures.Products or StoreFeatures.Categories or
+            StoreFeatures.Orders
+
         ).ToList();
 
     public static IReadOnlyList<StorePermission> Viewer =>
