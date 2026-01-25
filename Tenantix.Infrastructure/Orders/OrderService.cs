@@ -176,8 +176,25 @@ namespace Tenantix.Infrastructure.Orders
         public async Task<bool> UpdateStatusAsync(Guid id, OrderStatus status, CancellationToken cancellationToken)
         {
             var order = await _context.Orders.
-                FirstOrDefaultAsync(o => o.Id == id && o.IsActive, cancellationToken);
+                FirstOrDefaultAsync(o => o.Id == id , cancellationToken);
             if (order is null) return false;
+            // prevent changes on delivered or cancelled orders 
+            if (order.Status == OrderStatus.Delivered || order.Status == OrderStatus.Cancelled)
+                throw new InvalidOperationException("Cannot change status of a completed or cancelled order");
+            // validate allowed transitions
+            var isValidTransition = order.Status switch
+            {
+                OrderStatus.Pending => status == OrderStatus.Confirmed || status == OrderStatus.Cancelled,
+                // storefront order waiting for payment
+                OrderStatus.PendingPayment=> status == OrderStatus.Confirmed || status == OrderStatus.Cancelled,
+                OrderStatus.Confirmed => status == OrderStatus.Shipped || status == OrderStatus.Cancelled,
+                OrderStatus.Shipped => status == OrderStatus.Delivered,
+                _ => false
+            };
+            if (!isValidTransition)
+            {
+                throw new InvalidOperationException($"Invalid status transition from {order.Status} to {status}");
+            }
 
             order.Status = status;
             await _context.SaveChangesAsync(cancellationToken);
