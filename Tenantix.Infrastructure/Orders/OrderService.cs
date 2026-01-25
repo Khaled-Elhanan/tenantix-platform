@@ -31,7 +31,7 @@ namespace Tenantix.Infrastructure.Orders
             var productIds = request.OrderItems.Select(x => x.ProductId).Distinct().ToList();
             var products = await _context.Products.Where(p => productIds.Contains(p.Id) && p.IsActive)
                 .ToListAsync(cancellationToken);
-            if (productIds.Count != productIds.Count)
+            if (products.Count != productIds.Count)
             {
                 throw new InvalidOperationException("One or more prodcuts not found .");
 
@@ -152,13 +152,26 @@ namespace Tenantix.Infrastructure.Orders
         }
         public async Task<bool> CancelAsync(Guid id, CancellationToken cancellationToken)
         {
-            var order = await _context.Orders.FirstOrDefaultAsync(o=>o.Id== id && o.IsActive, cancellationToken);
-            if (order is null) return false;
-            order.Status=OrderStatus.Cancelled;
-            order.IsActive= false;
+            var order = await _context.Orders.Include(o => o.OrderItems)
+                .FirstOrDefaultAsync(o => o.Id == id , cancellationToken);
+            if(order is null) return false;
+            if(order.Status == OrderStatus.Cancelled) return false;
+            // restore stock 
+            var productIds = order.OrderItems.Select(oi => oi.ProductId).ToList();
+            var products = await _context.Products
+                .Where(p => productIds.Contains(p.Id))
+                .ToListAsync(cancellationToken);
+            foreach(var item in order.OrderItems)
+            {
+                var product = products.First(p => p.Id == item.ProductId);
+                product.Stock += item.Quantity;
+            }
+            // cancel order 
+            order.Status= OrderStatus.Cancelled;
             await _context.SaveChangesAsync(cancellationToken);
             return true;
-        }  
+
+        }
 
         public async Task<bool> UpdateStatusAsync(Guid id, OrderStatus status, CancellationToken cancellationToken)
         {
