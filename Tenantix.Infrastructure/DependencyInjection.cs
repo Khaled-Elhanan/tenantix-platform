@@ -38,6 +38,7 @@ using Tenantix.Application.Common.Constants.Authorization.Store;
 using Tenantix.Application.Common.Constants.Authorization.Common;
 using Tenantix.Infrastructure.Orders;
 using Tenantix.Infrastructure.Categories.Services;
+using Tenantix.Infrastructure.Identity.Auth.StoreAuth;
 
 namespace Tenantix.Infrastructure;
 
@@ -67,7 +68,9 @@ public static class DependencyInjection
             .AddTransient<ITenantDbSeeder, TenantDbSeeder>()
             .AddTransient<ApplicationDbSeeder>()
             .AddTransient<ITokenService, TokenService>()
-            .AddTransient<ITenantService, TenantService>()  
+            .AddTransient<ITenantService, TenantService>() 
+            .AddTransient<IStoreAuthService, StoreAuthService>() 
+            
             .AddTransient<IProductService, ProductService>()  
             .AddTransient<ICustomerService,CustomerService>()
             .AddTransient<IOrderService, OrderService>()

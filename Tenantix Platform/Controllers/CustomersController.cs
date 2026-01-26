@@ -10,7 +10,7 @@ namespace Tenantix_WebApi.Controllers
     [Route("api/[controller]")]
     [ApiController]
     [StoreTenantOnly]
-    public class CustomerController : BaseApiController
+    public class CustomersController : BaseApiController
     {
         [HttpPost]
         [ShouldHavePermission(StoreActions.Create, StoreFeatures.Customers)]

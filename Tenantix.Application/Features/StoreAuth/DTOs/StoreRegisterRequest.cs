@@ -1,0 +1,11 @@
+﻿namespace Tenantix.Application.Features.StoreAuth.DTOs
+{
+    public class StoreRegisterRequest
+    {
+        public string FirstName { get; set; } = default!;
+        public string LastName { get; set; } = default!;
+        public string Email { get; set; } = default!;
+        public string Password { get; set; } = default!;
+        public string? Phone { get; set; }
+    }
+}

@@ -8,7 +8,7 @@ using Tenantix.Application.Common.Identity.Tokens;
 using Tenantix.Application.Common.Identity.Tokens.Queries;
 using Tenantix.Infrastructure.Identity.Auth;
 
-namespace Tenantix_WebApi.Controllers
+namespace Tenantix_WebApi.Controllers.Auth
 {
     [Route("api/[controller]")]
     [ApiController]
