@@ -10,35 +10,78 @@ using Tenantix.Application.Common.Interfaces;
 using Tenantix.Infrastructure.MultiTenancy.Models;
 using Tenantix.Application.Common.Constants.MultiTenancy;
 using Tenantix.Application.Features.Tenants.DTOs;
+
 namespace Tenantix.Infrastructure.MultiTenancy.Services
 {
     public class TenantService : ITenantService
     {
         private readonly IMultiTenantStore<ApplicationTenantInfo> _tenantStore;
-        private readonly ApplicationDbSeeder _dbSeeder;
         private readonly IServiceProvider _serviceProvider;
 
-
-        public TenantService(IMultiTenantStore<ApplicationTenantInfo> tenantStore, ApplicationDbSeeder dbSeeder, IServiceProvider serviceProvider)
+        public TenantService(
+            IMultiTenantStore<ApplicationTenantInfo> tenantStore,
+            IServiceProvider serviceProvider)
         {
             _tenantStore = tenantStore;
-            _dbSeeder = dbSeeder;
             _serviceProvider = serviceProvider;
         }
 
-        public async Task<string> ActivateTenantAsync(string id)
+        public async Task<string> ActivateTenantAsync(string tenantIdOrIdentifier)
         {
-            var tenantInDb = await _tenantStore.TryGetAsync(id);
+            var tenantInDb = await FindTenantAsync(tenantIdOrIdentifier);
+
+            if (tenantInDb.ValidUpTo < DateTime.UtcNow)
+            {
+                throw new ConflictException(
+                    new List<string> { "Tenant subscription is expired. Please upgrade the subscription first." },
+                    HttpStatusCode.Conflict);
+            }
+
             tenantInDb.IsActive = true;
             await _tenantStore.TryUpdateAsync(tenantInDb);
-            return tenantInDb.Identifier;
+
+            return tenantInDb.Identifier!;
         }
 
-        public async Task<string> CreateTenantAsync(
-        CreateTenantRequest createTenant,
-        CancellationToken cancellationToken)
+        public async Task<string> DeactivateTenantAsync(string tenantIdOrIdentifier)
         {
-            // Check duplicate identifier
+            var tenantInDb = await FindTenantAsync(tenantIdOrIdentifier);
+
+            tenantInDb.IsActive = false;
+            await _tenantStore.TryUpdateAsync(tenantInDb);
+
+            return tenantInDb.Identifier!;
+        }
+
+        public async Task<TenantResponse> GetTenantByIdAsync(string tenantIdOrIdentifier)
+        {
+            var tenantInDb = await FindTenantAsync(tenantIdOrIdentifier);
+            return tenantInDb.Adapt<TenantResponse>();
+        }
+
+        public async Task<List<TenantResponse>> GetTenantsAsync()
+        {
+            var tenantsInDb = await _tenantStore.GetAllAsync();
+            return tenantsInDb.Adapt<List<TenantResponse>>();
+        }
+
+        public async Task<string> UpdateSubscriptionAsync(UpdateTenantSubscriptionRequest updateTenantSubscription)
+        {
+            var tenantInDb = await FindTenantAsync(updateTenantSubscription.TenantId);
+
+            tenantInDb.ValidUpTo = updateTenantSubscription.NewExpiryDate;
+
+            // Optional: auto-reactivate after upgrade
+            if (tenantInDb.ValidUpTo >= DateTime.UtcNow)
+                tenantInDb.IsActive = true;
+
+            await _tenantStore.TryUpdateAsync(tenantInDb);
+
+            return tenantInDb.Identifier!;
+        }
+
+        public async Task<string> CreateTenantAsync(CreateTenantRequest createTenant, CancellationToken cancellationToken)
+        {
             if (!string.IsNullOrWhiteSpace(createTenant.Identifier))
             {
                 var existingTenant = await _tenantStore.TryGetAsync(createTenant.Identifier);
@@ -50,7 +93,6 @@ namespace Tenantix.Infrastructure.MultiTenancy.Services
                 }
             }
 
-            // ?? Handle connection string properly
             var connectionString =
                 string.IsNullOrWhiteSpace(createTenant.ConnectionString) ||
                 createTenant.ConnectionString == "string"
@@ -60,26 +102,26 @@ namespace Tenantix.Infrastructure.MultiTenancy.Services
                     : createTenant.ConnectionString;
 
             var generatedId = string.IsNullOrWhiteSpace(createTenant.Identifier)
-             ? Guid.NewGuid().ToString()
-             : createTenant.Identifier;
+                ? Guid.NewGuid().ToString()
+                : createTenant.Identifier;
 
-                    var newTenant = new ApplicationTenantInfo
-                    {
-                        Id = generatedId,
-                        Identifier = generatedId, 
-                        IsActive = createTenant.IsActive,
-                        Name = createTenant.Name,
-                        ConnectionString = connectionString,
-                        OwnerEmail = createTenant.OwnerEmail,
-                        CompanyName = createTenant.CompanyName,
-                        TenantType = TenancyConstants.TenantTypes.Store,
-                        ValidUpTo = createTenant.ValidUpTo == default ? DateTime.UtcNow.AddYears(1) : createTenant.ValidUpTo
-                    };
-
+            var newTenant = new ApplicationTenantInfo
+            {
+                Id = generatedId,
+                Identifier = generatedId,
+                IsActive = createTenant.IsActive,
+                Name = createTenant.Name,
+                ConnectionString = connectionString,
+                OwnerEmail = createTenant.OwnerEmail,
+                CompanyName = createTenant.CompanyName,
+                TenantType = TenancyConstants.TenantTypes.Store,
+                ValidUpTo = createTenant.ValidUpTo == default
+                    ? DateTime.UtcNow.AddYears(1)
+                    : createTenant.ValidUpTo
+            };
 
             await _tenantStore.TryAddAsync(newTenant);
 
-            // IMPORTANT: run seeder INSIDE tenant context
             using var scope = _serviceProvider.CreateScope();
 
             var tenantContextSetter =
@@ -95,46 +137,27 @@ namespace Tenantix.Infrastructure.MultiTenancy.Services
                 .GetRequiredService<ApplicationDbSeeder>()
                 .InitializeDatabaseAsync(cancellationToken);
 
-            return newTenant.Identifier;
+            return newTenant.Identifier!;
         }
 
-
-
-
-        public async Task<string> DeactivateTenantAsync(string tenantId)
+        private async Task<ApplicationTenantInfo> FindTenantAsync(string tenantIdOrIdentifier)
         {
-            var tenantInDb = await _tenantStore.TryGetAsync(tenantId);
-            tenantInDb.IsActive = false;
-            await _tenantStore.TryUpdateAsync(tenantInDb);
-            return tenantInDb.Identifier;
+            // 1) Try by identifier (Finbuckle default)
+            var tenant = await _tenantStore.TryGetAsync(tenantIdOrIdentifier);
+            if (tenant != null)
+                return tenant;
 
+            // 2) Fallback: search by Id
+            var all = await _tenantStore.GetAllAsync();
+            tenant = all.FirstOrDefault(t =>
+                string.Equals(t.Id, tenantIdOrIdentifier, StringComparison.OrdinalIgnoreCase));
+
+            if (tenant is null)
+            {
+                throw new NotFoundException(new List<string> { "Tenant not found." });
+            }
+
+            return tenant;
         }
-        public async Task<TenantResponse> GetTenantByIdAsync(string tenantId)
-        {
-            var tenantInDb = await _tenantStore.TryGetAsync(tenantId);
-
-
-
-            // Using Mapster
-            return tenantInDb.Adapt<TenantResponse>();
-
-
-        }
-
-
-        public async Task<List<TenantResponse>> GetTenantsAsync()
-        {
-            var tenantsInDb = await _tenantStore.GetAllAsync();
-            return tenantsInDb.Adapt<List<TenantResponse>>();
-        }
-
-        public async Task<string> UpdateSubscriptionAsync(UpdateTenantSubscriptionRequest updateTenantSubscription)
-        {
-            var tenantInDb = await _tenantStore.TryGetAsync(updateTenantSubscription.TenantId);
-            tenantInDb.ValidUpTo = updateTenantSubscription.NewExpiryDate;
-            await _tenantStore.TryUpdateAsync(tenantInDb);
-            return tenantInDb.Identifier;
-        }
-
     }
 }

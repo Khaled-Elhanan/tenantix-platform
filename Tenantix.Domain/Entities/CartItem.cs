@@ -7,7 +7,7 @@ using Tenantix.Domain.Common;
 
 namespace Tenantix.Domain.Entities
 {
-    public class CartItem :BaseEntity
+    public class CartItem : TenantEntity
     {
         public Guid CartId { get; set; }
         public Cart Cart { get; set; }  =  null!;
