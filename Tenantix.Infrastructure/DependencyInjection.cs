@@ -39,7 +39,7 @@ using Tenantix.Application.Common.Constants.Authorization.Common;
 using Tenantix.Infrastructure.Orders;
 using Tenantix.Infrastructure.Categories.Services;
 using Tenantix.Infrastructure.Identity.Auth.StoreAuth;
-using Tenantix.Infrastructure.Carts.Services;
+using Tenantix.Infrastructure.Services;
 
 namespace Tenantix.Infrastructure;
 

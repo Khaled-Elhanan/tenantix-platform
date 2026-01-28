@@ -16,3 +16,4 @@ namespace Tenantix.Application.Features.Carts.Validations
             RuleFor(x => x.ProductId).NotEmpty();
         }
     }
+}

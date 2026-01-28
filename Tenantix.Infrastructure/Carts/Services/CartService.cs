@@ -157,15 +157,23 @@ public class CartService : ICartService
 
         if (cart is null)
             throw new NotFoundException(new List<string> { "Cart not found." });
+
         int totalItems = cart.Items.Sum(i => i.Quantity);
+
+        var productIds = cart.Items.Select(i => i.ProductId).Distinct().ToList();
+
+        var prices = await _productService.GetPricesByIdsAsync(productIds, cancellationToken);
+
         decimal subtotal = 0m;
-        foreach(var item in cart.Items)
+
+        foreach (var item in cart.Items)
         {
-            var product = await _productService.GetByIdAsync(item.ProductId, cancellationToken);
-            if(product is null)
+            if (!prices.TryGetValue(item.ProductId, out var price))
                 throw new NotFoundException(new List<string> { "Product not found." });
-            subtotal+=product.Price * item.Quantity;
+
+            subtotal += price * item.Quantity;
         }
+
         return new CartSummaryResponse
         {
             CustomerId = customerId,
@@ -175,4 +183,5 @@ public class CartService : ICartService
     }
 
 
-    }
+
+}

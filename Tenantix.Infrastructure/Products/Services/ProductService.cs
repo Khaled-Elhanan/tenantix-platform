@@ -128,5 +128,16 @@ namespace Tenantix.Infrastructure.Products.Services
             await _context.SaveChangesAsync(cancellationToken);
             return true;    
         }
+        public async Task<Dictionary<Guid, decimal>> GetPricesByIdsAsync(IEnumerable<Guid> productIds, CancellationToken cancellationToken)
+        {
+            var ids=productIds.Distinct().ToList();
+            if(ids.Count ==0)
+                return new Dictionary<Guid, decimal>();
+            return await _context.Products  
+                .AsNoTracking()
+                .Where(p=>ids.Contains(p.Id))
+                .Select(p=> new { p.Id, p.Price})
+                .ToDictionaryAsync(k=>k.Id, v=>v.Price, cancellationToken);
+        }
     }
 }
