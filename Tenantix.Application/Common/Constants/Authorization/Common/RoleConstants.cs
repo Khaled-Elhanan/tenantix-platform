@@ -10,11 +10,10 @@ namespace Tenantix.Application.Common.Constants.Authorization
     {
         public const string Owner = nameof(Owner);
         public const string Admin = nameof(Admin);
-        public const string Staff = nameof(Staff);
-        public const string Viewer = nameof(Viewer);
+     
 
         public static readonly IReadOnlyList<string> DefaultRoles =
-            new[] {Owner , Admin, Staff , Viewer};   
+            new[] {Owner , Admin};   
 
     }
 }

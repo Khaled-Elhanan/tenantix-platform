@@ -59,21 +59,23 @@ namespace Tenantix.Infrastructure.MultiTenancy.Services
                         .GetConnectionString("DefaultConnection")
                     : createTenant.ConnectionString;
 
-            var newTenant = new ApplicationTenantInfo
-            {
-                Id = string.IsNullOrWhiteSpace(createTenant.Identifier)
-                    ? Guid.NewGuid().ToString()
-                    : createTenant.Identifier,
+            var generatedId = string.IsNullOrWhiteSpace(createTenant.Identifier)
+             ? Guid.NewGuid().ToString()
+             : createTenant.Identifier;
 
-                Identifier = createTenant.Identifier,
-                IsActive = createTenant.IsActive,
-                Name = createTenant.Name,
-                ConnectionString = connectionString,
-                OwnerEmail = createTenant.OwnerEmail,
-                CompanyName=createTenant.CompanyName,
-                TenantType = TenancyConstants.TenantTypes.Store,
-                ValidUpTo = createTenant.ValidUpTo == default ? DateTime.UtcNow.AddYears(1) : createTenant.ValidUpTo
-            };
+                    var newTenant = new ApplicationTenantInfo
+                    {
+                        Id = generatedId,
+                        Identifier = generatedId, 
+                        IsActive = createTenant.IsActive,
+                        Name = createTenant.Name,
+                        ConnectionString = connectionString,
+                        OwnerEmail = createTenant.OwnerEmail,
+                        CompanyName = createTenant.CompanyName,
+                        TenantType = TenancyConstants.TenantTypes.Store,
+                        ValidUpTo = createTenant.ValidUpTo == default ? DateTime.UtcNow.AddYears(1) : createTenant.ValidUpTo
+                    };
+
 
             await _tenantStore.TryAddAsync(newTenant);
 

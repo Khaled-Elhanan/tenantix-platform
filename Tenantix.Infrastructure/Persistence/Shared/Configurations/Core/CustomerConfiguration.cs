@@ -30,6 +30,8 @@ namespace Tenantix.Infrastructure.Persistence.Shared.Configurations.Core
                 .HasMaxLength(20);
 
             builder.HasIndex(x => new { x.TenantId, x.Email }).IsUnique();
+            builder.Property(x => x.UserId).IsRequired(false);
+
 
         }
     }

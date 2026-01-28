@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using System.Text.RegularExpressions;
 using Tenantix.Application.Common.Constants.Authorization.Common;
+using Tenantix.Application.Common.Constants.Authorization.Store;
 using Tenantix.Application.Common.Constants.MultiTenancy;
 using Tenantix.Infrastructure.Identity.Models;
 using Tenantix.Infrastructure.MultiTenancy.Models;
@@ -31,20 +32,16 @@ public class ApplicationDbSeeder
     {
         await RunMigrationsAsync(cancellationToken);
         await InitializeRolesAsync(cancellationToken);
+        await InitializeRoleClaimsAsync(cancellationToken);
         await InitializeAdminUserAsync(cancellationToken);
     }
 
-
-    // Migrations
-    
     protected virtual async Task RunMigrationsAsync(CancellationToken cancellationToken)
     {
         var pending = await _context.Database.GetPendingMigrationsAsync(cancellationToken);
         if (pending.Any())
             await _context.Database.MigrateAsync(cancellationToken);
     }
-
-    // Roles (Admin + Customer ONLY)
 
     private async Task InitializeRolesAsync(CancellationToken cancellationToken)
     {
@@ -77,20 +74,66 @@ public class ApplicationDbSeeder
 
             var result = await _roleManager.CreateAsync(role);
             if (!result.Succeeded)
-            {
-                throw new Exception(string.Join(", ",
-                    result.Errors.Select(e => e.Description)));
-            }
+                throw new Exception(string.Join(", ", result.Errors.Select(e => e.Description)));
         }
     }
 
-    // Default Admin User (Tenant Owner)
+    private async Task InitializeRoleClaimsAsync(CancellationToken cancellationToken)
+    {
+        var tenant = _tenantContext.MultiTenantContext?.TenantInfo
+            ?? throw new InvalidOperationException("Tenant context is missing.");
+
+        var tenantId = tenant.Identifier
+            ?? throw new InvalidOperationException("Tenant identifier is missing.");
+
+        if (tenant.TenantType == TenancyConstants.TenantTypes.Platform)
+            return;
+
+        await SeedStoreRoleClaimsAsync(tenantId, "Admin", StorePermissions.Admin, cancellationToken);
+        await SeedStoreRoleClaimsAsync(tenantId, "Customer", StorePermissions.Customer, cancellationToken);
+    }
+
+    private async Task SeedStoreRoleClaimsAsync(
+        string tenantId,
+        string roleBaseName,
+        IReadOnlyList<StorePermissions.StorePermission> permissions,
+        CancellationToken cancellationToken)
+    {
+        var roleName = BuildTenantAwareName(tenantId, roleBaseName);
+        var role = await _roleManager.FindByNameAsync(roleName);
+        if (role is null) return;
+
+        var existingValues = await _context.RoleClaims
+            .AsNoTracking()
+            .Where(rc => rc.RoleId == role.Id && rc.ClaimType == ClaimConstants.Permissions)
+            .Select(rc => rc.ClaimValue)
+            .ToListAsync(cancellationToken);
+
+        foreach (var perm in permissions)
+        {
+            var permName = perm.Name;
+
+            if (existingValues.Contains(permName))
+                continue;
+
+            _context.RoleClaims.Add(new ApplicationRoleClaim
+            {
+                RoleId = role.Id,
+                RoleName = role.Name!,
+                ClaimType = ClaimConstants.Permissions,
+                ClaimValue = permName,
+                Description = perm.Description
+            });
+        }
+
+        await _context.SaveChangesAsync(cancellationToken);
+    }
+
     private async Task InitializeAdminUserAsync(CancellationToken cancellationToken)
     {
         var tenant = _tenantContext.MultiTenantContext?.TenantInfo;
         if (tenant == null) return;
 
-        // Skip platform tenant
         if (tenant.TenantType == TenancyConstants.TenantTypes.Platform)
             return;
 
@@ -99,9 +142,7 @@ public class ApplicationDbSeeder
         var username = Sanitize(BuildTenantAwareName(tenantId, email));
 
         var user = await _userManager.Users
-            .SingleOrDefaultAsync(u =>
-                u.UserName == username && u.TenantId == tenantId,
-                cancellationToken);
+            .SingleOrDefaultAsync(u => u.UserName == username && u.TenantId == tenantId, cancellationToken);
 
         if (user == null)
         {
@@ -120,16 +161,11 @@ public class ApplicationDbSeeder
             };
 
             var hasher = new PasswordHasher<ApplicationUser>();
-            user.PasswordHash = hasher.HashPassword(
-                user,
-                TenancyConstants.Root.DefaultPassword);
+            user.PasswordHash = hasher.HashPassword(user, TenancyConstants.Root.DefaultPassword);
 
             var result = await _userManager.CreateAsync(user);
             if (!result.Succeeded)
-            {
-                throw new Exception(string.Join(", ",
-                    result.Errors.Select(e => e.Description)));
-            }
+                throw new Exception(string.Join(", ", result.Errors.Select(e => e.Description)));
         }
 
         var adminRole = BuildTenantAwareName(tenantId, "Admin");
@@ -138,9 +174,6 @@ public class ApplicationDbSeeder
             await _userManager.AddToRoleAsync(user, adminRole);
         }
     }
-
-
-    // Helpers
 
     private static string BuildTenantAwareName(string tenantId, string value)
         => $"{tenantId}__{value}";

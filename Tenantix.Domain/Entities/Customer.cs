@@ -14,7 +14,7 @@ namespace Tenantix.Domain.Entities
         public string Email { get; set; } = default!;
         public string? Phone { get; set; }
 
-        public string UserId { get; set; } = default!;
+        public string? UserId { get; set; }
 
     }
 }

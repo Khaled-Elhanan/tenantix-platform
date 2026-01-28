@@ -45,8 +45,14 @@ public static class StorePermissions
         new(StoreActions.Delete, StoreFeatures.Orders, "Delete orders", "Orders"),
         new(StoreActions.Create, StoreFeatures.Orders, "Create orders", "Orders"),
 
-        // ========= STAFF =========
-        new(StoreActions.Manage, StoreFeatures.Staff, "Manage staff", "Staff", OwnerOnly: true),
+        // ========= CARTS =========
+        new(StoreActions.Read, StoreFeatures.Carts, "View carts", "Orders"),
+        new(StoreActions.Create, StoreFeatures.Carts, "Add items to cart", "Orders"),
+        new(StoreActions.Update, StoreFeatures.Carts, "Update cart items", "Orders"),
+        new(StoreActions.Delete, StoreFeatures.Carts, "Clear/remove cart items", "Orders"),
+
+
+     
 
         // ========= BILLING =========
        // new(StoreActions.Manage, StoreFeatures.Billing, "Manage billing", "Billing", OwnerOnly: true),
@@ -61,12 +67,18 @@ public static class StorePermissions
     public static IReadOnlyList<StorePermission> Admin =>
         _all.Where(p => !p.OwnerOnly).ToList();
 
-    public static IReadOnlyList<StorePermission> Staff =>
-        _all.Where(p =>
-            p.Feature is StoreFeatures.Products or StoreFeatures.Categories or
-            StoreFeatures.Orders
+    public static IReadOnlyList<StorePermission> Customer =>
+         _all.Where(p =>
+        
+        (p.Feature is StoreFeatures.Products or StoreFeatures.Categories && p.Action == StoreActions.Read)
+     
+        || (p.Feature is StoreFeatures.Carts &&
+            (p.Action == StoreActions.Read ||
+             p.Action == StoreActions.Create ||
+             p.Action == StoreActions.Update ||
+             p.Action == StoreActions.Delete))
 
-        ).ToList();
+    ).ToList();
 
     public static IReadOnlyList<StorePermission> Viewer =>
         _all.Where(p => p.Action == StoreActions.Read).ToList();

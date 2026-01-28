@@ -239,6 +239,11 @@ public class TokenService : ITokenService
                 roleClaims.Add(new Claim(ClaimTypes.Role, userRole));
                 var currentRole = await _roleManager.FindByNameAsync(userRole);
                 var allPermissionForCurrentRole = await _roleManager.GetClaimsAsync(currentRole);
+                foreach(var rc in allPermissionForCurrentRole)
+            {
+                permissionClaims.Add(new Claim(ClaimConstants.Permissions, rc.Value));
+            }
+            
                 permissionClaims.AddRange(allPermissionForCurrentRole);
             }
 

@@ -13,8 +13,9 @@ namespace Tenantix.Application.Common.Constants.Authorization.Store
         public const string Categories = nameof(Categories);
         public const string Orders = nameof(Orders);
         public const string Customers = nameof(Customers);
-      
-        public const string Staff = nameof(Staff);
+        public const string Carts = nameof(Carts);  
+
+        
         public const string Billing = nameof(Billing);
         public const string Settings = nameof(Settings);
 
