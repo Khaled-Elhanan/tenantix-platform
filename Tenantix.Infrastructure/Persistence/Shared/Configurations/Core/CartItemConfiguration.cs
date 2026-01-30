@@ -23,7 +23,9 @@ namespace Tenantix.Infrastructure.Persistence.Shared.Configurations.Core
                 .HasPrecision(18, 2)
                 .IsRequired();
 
-            builder.HasIndex(x => new { x.CartId, x.ProductId }).IsUnique();
+            builder.HasIndex(x => new { x.TenantId, x.CartId, x.ProductId }).IsUnique();
+
+            builder.HasIndex(x => new { x.TenantId, x.IsActive });
         }
     }
 }

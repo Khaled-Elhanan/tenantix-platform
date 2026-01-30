@@ -24,6 +24,9 @@ namespace Tenantix.Infrastructure.Persistence.Shared.Configurations.Core
                 .HasPrecision(18, 2)
                 .IsRequired();
 
+            builder.Property(x => x.RowVersion)
+                .IsRowVersion();
+
          
             builder.HasIndex(x => new { x.TenantId, x.SKU })
                    .IsUnique();

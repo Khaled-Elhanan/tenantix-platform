@@ -2,6 +2,8 @@
 using Finbuckle.MultiTenant.EntityFrameworkCore;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using System;
+using System.Linq;
 using System.Reflection;
 using Tenantix.Domain.Common;
 using Tenantix.Infrastructure.Identity.Models;
@@ -56,14 +58,35 @@ namespace Tenantix.Infrastructure.Persistence.Context
             }
         }
 
+        private void ApplyAuditFields()
+        {
+            var utcNow = DateTime.UtcNow;
+
+            // Ensure CreatedAt is always set server-side
+            foreach (var entry in ChangeTracker.Entries<BaseEntity>()
+                         .Where(e => e.State == EntityState.Added))
+            {
+                entry.Entity.CreatedAt = utcNow;
+            }
+
+            // Update UpdatedAt for modified auditable entities
+            foreach (var entry in ChangeTracker.Entries<AuditableEntity>()
+                         .Where(e => e.State == EntityState.Modified))
+            {
+                entry.Entity.UpdatedAt = utcNow;
+            }
+        }
+
         public override int SaveChanges(bool acceptAllChangesOnSuccess)
         {
+            ApplyAuditFields();
             ApplyTenantIds();
             return base.SaveChanges(acceptAllChangesOnSuccess);
         }
 
         public override Task<int> SaveChangesAsync(bool acceptAllChangesOnSuccess, CancellationToken cancellationToken = default)
         {
+            ApplyAuditFields();
             ApplyTenantIds();
             return base.SaveChangesAsync(acceptAllChangesOnSuccess, cancellationToken);
         }

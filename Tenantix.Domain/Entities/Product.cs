@@ -14,6 +14,9 @@ namespace Tenantix.Domain.Entities
         public int Stock { get; set;  }
         public string SKU { get; set; }=default!;
 
+        // Optimistic concurrency token (prevents overselling / lost updates)
+        public byte[] RowVersion { get; set; } = default!;
+
         public Guid? CategoryId { get; set; }
 
         public Category? Category { get; set; }

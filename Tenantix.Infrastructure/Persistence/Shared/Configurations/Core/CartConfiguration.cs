@@ -16,7 +16,10 @@ namespace Tenantix.Infrastructure.Persistence.Shared.Configurations.Core
 
             builder.HasKey(x => x.Id);
 
-            builder.HasIndex(x => x.CustomerId).IsUnique();
+            // Multi-tenant safety: ensure one cart per customer per tenant (not globally)
+            builder.HasIndex(x => new { x.TenantId, x.CustomerId }).IsUnique();
+
+            builder.HasIndex(x => new { x.TenantId, x.IsActive });
 
             builder
                 .HasMany(x => x.Items)

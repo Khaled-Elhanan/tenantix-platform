@@ -1,4 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using System;
+using System.Linq;
 using Tenantix.Application.Common.Interfaces;
 using Tenantix.Application.Features.Orders.DTOs;
 using Tenantix.Domain.Entities;
@@ -16,10 +18,16 @@ namespace Tenantix.Infrastructure.Orders
             _context = context;
         }
 
-      
-
         public async Task<Guid> CreateAsync(CreateOrderRequest request, CancellationToken cancellationToken)
         {
+          
+            if (request is null) throw new ArgumentNullException(nameof(request));
+            if (request.OrderItems is null || request.OrderItems.Count == 0)
+                throw new InvalidOperationException("Order must contain at least one item.");
+
+            // Use an explicit transaction so stock updates + order creation are atomic
+            await using var tx = await _context.Database.BeginTransactionAsync(cancellationToken);
+
             // 1) validate customer exists
             var customerExsit = await _context.Customers.
                 AnyAsync(c => c.Id == request.CustomerId && c.IsActive, cancellationToken);
@@ -50,8 +58,6 @@ namespace Tenantix.Infrastructure.Orders
                     throw new InvalidOperationException($"Insufficient stock for product: {product.Name}");
                 }
             }
-            // 4) create order
-
             var order = new Order
             {
                 CustomerId = request.CustomerId,
@@ -59,7 +65,8 @@ namespace Tenantix.Infrastructure.Orders
                 AddressLine = request.AddressLine,
                 City = request.City,
                 Phone = request.Phone,
-                OrderNumber = $"ORD-{DateTime.UtcNow:yyyyMMddHHmmss}",
+                
+                OrderNumber = $"ORD-{DateTime.UtcNow:yyyyMMddHHmmss}-{Random.Shared.Next(1000, 10000)}",
             };
             decimal total = 0;
             foreach (var item in request.OrderItems)
@@ -86,7 +93,21 @@ namespace Tenantix.Infrastructure.Orders
             order.TotalAmount = total;
 
             _context.Orders.Add(order);
-            await _context.SaveChangesAsync(cancellationToken);
+            try
+            {
+                await _context.SaveChangesAsync(cancellationToken);
+                await tx.CommitAsync(cancellationToken);
+            }
+            catch (DbUpdateConcurrencyException ex)
+            {
+                await tx.RollbackAsync(cancellationToken);
+                throw new InvalidOperationException("The order could not be completed due to a concurrent update (stock changed). Please retry.", ex);
+            }
+            catch
+            {
+                await tx.RollbackAsync(cancellationToken);
+                throw;
+            }
 
             return order.Id;
 
@@ -123,6 +144,10 @@ namespace Tenantix.Infrastructure.Orders
 
         public async Task<PagedResponse<OrderListItemResponse>> GetPagedAsync(int page, int pageSize, CancellationToken cancellationToken)
         {
+            
+            page = Math.Max(page, 1);
+            pageSize = Math.Clamp(pageSize, 1, 200);
+
             var query = _context.Orders.AsNoTracking()
                 .Where(p => p.IsActive)
                 .OrderByDescending(o => o.CreatedAt);
@@ -152,6 +177,8 @@ namespace Tenantix.Infrastructure.Orders
         }
         public async Task<bool> CancelAsync(Guid id, CancellationToken cancellationToken)
         {
+            await using var tx = await _context.Database.BeginTransactionAsync(cancellationToken);
+
             var order = await _context.Orders.Include(o => o.OrderItems)
                 .FirstOrDefaultAsync(o => o.Id == id , cancellationToken);
             if(order is null) return false;
@@ -168,7 +195,21 @@ namespace Tenantix.Infrastructure.Orders
             }
             // cancel order 
             order.Status= OrderStatus.Cancelled;
-            await _context.SaveChangesAsync(cancellationToken);
+            try
+            {
+                await _context.SaveChangesAsync(cancellationToken);
+                await tx.CommitAsync(cancellationToken);
+            }
+            catch (DbUpdateConcurrencyException ex)
+            {
+                await tx.RollbackAsync(cancellationToken);
+                throw new InvalidOperationException("The order cancellation could not be completed due to a concurrent update. Please retry.", ex);
+            }
+            catch
+            {
+                await tx.RollbackAsync(cancellationToken);
+                throw;
+            }
             return true;
 
         }
