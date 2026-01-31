@@ -183,6 +183,7 @@ namespace Tenantix.Infrastructure.Orders
                 .FirstOrDefaultAsync(o => o.Id == id , cancellationToken);
             if(order is null) return false;
             if(order.Status == OrderStatus.Cancelled) return false;
+            order.Cancel();
             // restore stock 
             var productIds = order.OrderItems.Select(oi => oi.ProductId).ToList();
             var products = await _context.Products
@@ -193,8 +194,7 @@ namespace Tenantix.Infrastructure.Orders
                 var product = products.First(p => p.Id == item.ProductId);
                 product.Stock += item.Quantity;
             }
-            // cancel order 
-            order.Status= OrderStatus.Cancelled;
+ 
             try
             {
                 await _context.SaveChangesAsync(cancellationToken);
@@ -214,32 +214,45 @@ namespace Tenantix.Infrastructure.Orders
 
         }
 
-        public async Task<bool> UpdateStatusAsync(Guid id, OrderStatus status, CancellationToken cancellationToken)
+        public async Task<bool> ConfirmAsync(Guid id, CancellationToken ct)
         {
             var order = await _context.Orders.
-                FirstOrDefaultAsync(o => o.Id == id , cancellationToken);
+                FirstOrDefaultAsync(o => o.Id == id , ct);
             if (order is null) return false;
-            // prevent changes on delivered or cancelled orders 
-            if (order.Status == OrderStatus.Delivered || order.Status == OrderStatus.Cancelled)
-                throw new InvalidOperationException("Cannot change status of a completed or cancelled order");
-            // validate allowed transitions
-            var isValidTransition = order.Status switch
-            {
-                OrderStatus.Pending => status == OrderStatus.Confirmed || status == OrderStatus.Cancelled,
-                // storefront order waiting for payment
-                OrderStatus.PendingPayment=> status == OrderStatus.Confirmed || status == OrderStatus.Cancelled,
-                OrderStatus.Confirmed => status == OrderStatus.Shipped || status == OrderStatus.Cancelled,
-                OrderStatus.Shipped => status == OrderStatus.Delivered,
-                _ => false
-            };
-            if (!isValidTransition)
-            {
-                throw new InvalidOperationException($"Invalid status transition from {order.Status} to {status}");
-            }
-
-            order.Status = status;
-            await _context.SaveChangesAsync(cancellationToken);
+            order.Confirm();
+            await _context.SaveChangesAsync(ct);
             return true;
         }
+        public async Task<bool> PackAsync(Guid id, CancellationToken ct)
+        {
+            var order = await _context.Orders.
+                FirstOrDefaultAsync(o => o.Id == id , ct);
+            if (order is null) return false;
+            order.Pack();
+            await _context.SaveChangesAsync(ct);
+            return true;
+        }
+        public async Task<bool> ShipAsync(Guid id, CancellationToken ct)
+        {
+            var order = await _context.Orders.
+                FirstOrDefaultAsync(o => o.Id == id , ct);
+            if (order is null) return false;
+            order.Ship();
+            await _context.SaveChangesAsync(ct);
+            return true;
+        }
+        public async Task<bool> DeliverAsync(Guid id, CancellationToken ct)
+        {
+            var order = await _context.Orders.
+                FirstOrDefaultAsync(o => o.Id == id , ct);
+            if (order is null) return false;
+            order.Deliver();
+            await _context.SaveChangesAsync(ct);
+            return true;
+        }
+
+
+
+     
     }
 }

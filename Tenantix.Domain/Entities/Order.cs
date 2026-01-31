@@ -26,6 +26,40 @@ namespace Tenantix.Domain.Entities
 
         public ICollection<OrderItem> OrderItems { get; set; } = new List<OrderItem>();
 
+        public void Confirm()
+        {
+            if(Status!=OrderStatus.Pending)
+                throw new InvalidOperationException("Only pending orders can be confirmed.");   
+            Status= OrderStatus.Confirmed;
+        }
+        public void Pack()
+        {
+            if (Status != OrderStatus.Confirmed)
+                throw new InvalidOperationException("Only confirmed orders can be packed.");
+            Status = OrderStatus.Packed;
+        }
+        public void Ship()
+        {
+            if (Status != OrderStatus.Packed)
+                throw new InvalidOperationException("Only packed orders can be shipped.");
+            Status = OrderStatus.Shipped;
+        }
+        public void Deliver()
+        {
+            if (Status != OrderStatus.Shipped)
+                throw new InvalidOperationException("Only shipped orders can be delivered.");
+            Status = OrderStatus.Delivered;
+        }
+        public void Cancel()
+        {
+            if (Status == OrderStatus.Shipped || Status == OrderStatus.Delivered)
+                throw new InvalidOperationException("Cannot cancel shipped or delivered orders.");
+
+            if (Status == OrderStatus.Cancelled)
+                return;
+
+            Status = OrderStatus.Cancelled;
+        }
 
     }
 }

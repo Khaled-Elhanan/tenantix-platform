@@ -16,6 +16,11 @@ namespace Tenantix.Application.Common.Interfaces
         Task<OrderResponse?> GetByIdAsync(Guid id, CancellationToken cancellationToken);
         Task<bool> CancelAsync(Guid id, CancellationToken cancellationToken);
 
-        Task<bool> UpdateStatusAsync(Guid id, OrderStatus status, CancellationToken cancellationToken);
+
+        Task<bool> ConfirmAsync(Guid id, CancellationToken ct);
+        Task<bool> PackAsync(Guid id, CancellationToken ct);
+        Task<bool> ShipAsync(Guid id, CancellationToken ct);
+        Task<bool> DeliverAsync(Guid id, CancellationToken ct);
+
     }
 }
