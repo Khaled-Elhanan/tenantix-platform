@@ -31,11 +31,16 @@ namespace Tenantix.Infrastructure.Orders
             {
                 await using var tx = await _context.Database.BeginTransactionAsync(cancellationToken);
 
-                // 1) validate customer exists
-                var customerExsit = await _context.Customers
-                    .AnyAsync(c => c.Id == request.CustomerId && c.IsActive, cancellationToken);
+                
+                var requestedId = request.CustomerId;
+                var requestedUserId = requestedId.ToString();
 
-                if (!customerExsit)
+                var customerId = await _context.Customers
+                    .Where(c => c.IsActive && (c.Id == requestedId || c.UserId == requestedUserId))
+                    .Select(c => c.Id)
+                    .FirstOrDefaultAsync(cancellationToken);
+
+                if (customerId == Guid.Empty)
                     throw new InvalidOperationException("Customer not found.");
 
                 // 2) load products
@@ -62,7 +67,7 @@ namespace Tenantix.Infrastructure.Orders
 
                 var order = new Order
                 {
-                    CustomerId = request.CustomerId,
+                    CustomerId = customerId,
                     Notes = request.Notes,
                     AddressLine = request.AddressLine,
                     City = request.City,
@@ -197,7 +202,7 @@ namespace Tenantix.Infrastructure.Orders
                 if (order is null) return false;
                 if (order.Status == OrderStatus.Cancelled) return false;
 
-                // Apply domain rule (throws if not allowed)
+             
                 order.Cancel();
 
                 // restore stock
@@ -285,21 +290,25 @@ namespace Tenantix.Infrastructure.Orders
             {
                 await using var tx = await _context.Database.BeginTransactionAsync(ct);
 
-                var customerExists = await _context.Customers
-                    .AnyAsync(x => x.Id == customerId && x.IsActive, ct);
+                // validate customer exists 
+                var requestedId = customerId;
+                var requestedUserId = requestedId.ToString();
 
-                if (!customerExists)
+                var resolvedCustomerId = await _context.Customers
+                    .Where(c => c.IsActive && (c.Id == requestedId || c.UserId == requestedUserId))
+                    .Select(c => c.Id)
+                    .FirstOrDefaultAsync(ct);
+
+                if (resolvedCustomerId == Guid.Empty)
                     throw new InvalidOperationException("Customer not found.");
 
-        
                 var cart = await _context.Carts
                     .Include(c => c.Items)
-                    .FirstOrDefaultAsync(c => c.CustomerId == customerId && c.IsActive, ct);
+                    .FirstOrDefaultAsync(c => c.CustomerId == resolvedCustomerId && c.IsActive, ct);
 
                 if (cart is null || cart.Items.Count == 0)
                     throw new InvalidOperationException("Cart is empty.");
 
-    
                 var productIds = cart.Items.Select(i => i.ProductId).Distinct().ToList();
 
                 var products = await _context.Products
@@ -309,7 +318,6 @@ namespace Tenantix.Infrastructure.Orders
                 if (products.Count != productIds.Count)
                     throw new InvalidOperationException("One or more products not found.");
 
-             
                 foreach (var item in cart.Items)
                 {
                     if (item.Quantity <= 0)
@@ -321,10 +329,9 @@ namespace Tenantix.Infrastructure.Orders
                         throw new InvalidOperationException($"Insufficient stock for product: {product.Name}");
                 }
 
-            
                 var order = new Order
                 {
-                    CustomerId = customerId,
+                    CustomerId = resolvedCustomerId,
                     Notes = request.Notes,
                     AddressLine = request.AddressLine,
                     City = request.City,
@@ -358,7 +365,7 @@ namespace Tenantix.Infrastructure.Orders
 
                 order.TotalAmount = total;
 
-                // 6) clear cart items (delete rows)
+               
                 _context.RemoveRange(cart.Items);
 
                 _context.Orders.Add(order);

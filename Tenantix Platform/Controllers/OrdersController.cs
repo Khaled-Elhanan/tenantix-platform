@@ -1,4 +1,6 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using DocumentFormat.OpenXml.Spreadsheet;
+using Microsoft.AspNetCore.Mvc;
+using System.Security.Claims;
 using Tenantix.Application.Common.Constants.Authorization.Store;
 using Tenantix.Application.Features.Orders.Commands;
 using Tenantix.Application.Features.Orders.Commands.Lifecycle;
@@ -16,6 +18,7 @@ namespace Tenantix_WebApi.Controllers
     {
         [HttpPost("add")]
         [ShouldHavePermission(StoreActions.Create, StoreFeatures.Orders)]
+        [ShouldHavePermission(StoreActions.Read, StoreFeatures.Customers)]
         public async Task<IActionResult> CreateOrderAsync([FromBody] CreateOrderRequest request)
         {
             var response = await Sender.Send(new CreateOrderCommand
@@ -117,19 +120,31 @@ namespace Tenantix_WebApi.Controllers
             return BadRequest(response);
         }
 
-        [HttpPost("checkout/{customerId:guid}")]
-        [ShouldHavePermission(StoreActions.Create , StoreFeatures.Orders)]
-        public async   Task<IActionResult> CheckoutAsync(Guid customerId , [FromBody] CheckoutRequest request , CancellationToken cancellation)
-        {
-            var response = await Sender.Send(new CheckoutFromCartCommand
-            {
-                CustomerId = customerId,
-                CheckoutRequest = request,
-            });
-            if (response.IsSuccessful)
-                return Ok(response);
-            return BadRequest(response);
 
-        }
+        [HttpPost("checkout")]
+        [ShouldHavePermission(StoreActions.Checkout, StoreFeatures.Orders)]
+        public async Task<IActionResult> CheckoutAsync([FromBody] CheckoutRequest request, CancellationToken cancellation)
+            {
+               
+                var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+
+                if (string.IsNullOrWhiteSpace(userId))
+                    return Unauthorized();
+
+                if (!Guid.TryParse(userId, out var userGuid))
+                    return Unauthorized("Invalid user id in token.");
+
+                var response = await Sender.Send(new CheckoutFromCartCommand
+                {        
+                    CustomerId = userGuid,           
+                    CheckoutRequest = request,
+                }, cancellation);
+
+                if (response.IsSuccessful)
+                    return Ok(response);
+
+                return BadRequest(response);
     }
+
+}
 }

@@ -13,6 +13,8 @@ namespace Tenantix.Application.Common.Constants.Authorization.Store
         public const string Update = nameof(Update);
         public const string Delete = nameof(Delete);
         public const string Manage = nameof(Manage);
+        public const string Checkout = nameof(Checkout);
+
 
     }
 }
