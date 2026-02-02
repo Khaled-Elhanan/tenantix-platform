@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Tenantix.Application.Features.Orders.DTOs;
-using Tenantix.Domain.Enums;
+﻿using Tenantix.Application.Features.Orders.DTOs;
 using Tenantix.Shared.Models;
 
 namespace Tenantix.Application.Common.Interfaces
@@ -21,6 +15,8 @@ namespace Tenantix.Application.Common.Interfaces
         Task<bool> PackAsync(Guid id, CancellationToken ct);
         Task<bool> ShipAsync(Guid id, CancellationToken ct);
         Task<bool> DeliverAsync(Guid id, CancellationToken ct);
+
+        Task<Guid>CheckoutFromCartAsync(Guid cartId , CheckoutRequest request , CancellationToken ct);
 
     }
 }

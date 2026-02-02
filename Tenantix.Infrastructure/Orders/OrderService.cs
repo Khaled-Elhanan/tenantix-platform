@@ -13,6 +13,7 @@ namespace Tenantix.Infrastructure.Orders
     public class OrderService : IOrderService
     {
         private readonly ApplicationDbContext _context;
+
         public OrderService(ApplicationDbContext context)
         {
             _context = context;
@@ -20,97 +21,103 @@ namespace Tenantix.Infrastructure.Orders
 
         public async Task<Guid> CreateAsync(CreateOrderRequest request, CancellationToken cancellationToken)
         {
-          
             if (request is null) throw new ArgumentNullException(nameof(request));
             if (request.OrderItems is null || request.OrderItems.Count == 0)
                 throw new InvalidOperationException("Order must contain at least one item.");
 
-            // Use an explicit transaction so stock updates + order creation are atomic
-            await using var tx = await _context.Database.BeginTransactionAsync(cancellationToken);
+            var strategy = _context.Database.CreateExecutionStrategy();
 
-            // 1) validate customer exists
-            var customerExsit = await _context.Customers.
-                AnyAsync(c => c.Id == request.CustomerId && c.IsActive, cancellationToken);
-            if (!customerExsit)
+            return await strategy.ExecuteAsync(async () =>
             {
-                throw new InvalidOperationException("Customer not found.");
-            }
-            // 2) load products
-            var productIds = request.OrderItems.Select(x => x.ProductId).Distinct().ToList();
-            var products = await _context.Products.Where(p => productIds.Contains(p.Id) && p.IsActive)
-                .ToListAsync(cancellationToken);
-            if (products.Count != productIds.Count)
-            {
-                throw new InvalidOperationException("One or more prodcuts not found .");
+                await using var tx = await _context.Database.BeginTransactionAsync(cancellationToken);
 
-            }
-            // 3) stock check 
+                // 1) validate customer exists
+                var customerExsit = await _context.Customers
+                    .AnyAsync(c => c.Id == request.CustomerId && c.IsActive, cancellationToken);
 
-            foreach (var item in request.OrderItems)
-            {
-                if (item.Quantity <= 0)
+                if (!customerExsit)
+                    throw new InvalidOperationException("Customer not found.");
+
+                // 2) load products
+                var productIds = request.OrderItems.Select(x => x.ProductId).Distinct().ToList();
+
+                var products = await _context.Products
+                    .Where(p => productIds.Contains(p.Id) && p.IsActive)
+                    .ToListAsync(cancellationToken);
+
+                if (products.Count != productIds.Count)
+                    throw new InvalidOperationException("One or more prodcuts not found.");
+
+                // 3) stock check
+                foreach (var item in request.OrderItems)
                 {
-                    throw new InvalidOperationException("Quantity must be greater than zero.");
+                    if (item.Quantity <= 0)
+                        throw new InvalidOperationException("Quantity must be greater than zero.");
+
+                    var product = products.First(p => p.Id == item.ProductId);
+
+                    if (product.Stock < item.Quantity)
+                        throw new InvalidOperationException($"Insufficient stock for product: {product.Name}");
                 }
-                var product = products.First(p => p.Id == item.ProductId);
-                if (product.Stock < item.Quantity)
+
+                var order = new Order
                 {
-                    throw new InvalidOperationException($"Insufficient stock for product: {product.Name}");
+                    CustomerId = request.CustomerId,
+                    Notes = request.Notes,
+                    AddressLine = request.AddressLine,
+                    City = request.City,
+                    Phone = request.Phone,
+                    OrderNumber = $"ORD-{DateTime.UtcNow:yyyyMMddHHmmss}-{Random.Shared.Next(1000, 10000)}",
+                    Status = OrderStatus.Pending
+                };
+
+                decimal total = 0;
+
+                foreach (var item in request.OrderItems)
+                {
+                    var product = products.First(p => p.Id == item.ProductId);
+
+                    var unitPrice = product.Price;
+                    var lineTotal = unitPrice * item.Quantity;
+
+                    total += lineTotal;
+
+                    order.OrderItems.Add(new OrderItem
+                    {
+                        ProductId = product.Id,
+                        ProductName = product.Name,
+                        UnitPrice = unitPrice,
+                        Quantity = item.Quantity,
+                        LineTotal = lineTotal
+                    });
+
+                    product.Stock -= item.Quantity;
                 }
-            }
-            var order = new Order
-            {
-                CustomerId = request.CustomerId,
-                Notes = request.Notes,
-                AddressLine = request.AddressLine,
-                City = request.City,
-                Phone = request.Phone,
-                
-                OrderNumber = $"ORD-{DateTime.UtcNow:yyyyMMddHHmmss}-{Random.Shared.Next(1000, 10000)}",
-            };
-            decimal total = 0;
-            foreach (var item in request.OrderItems)
-            {
-                var product = products.First(p => p.Id == item.ProductId);
 
-                var unitPrice = product.Price;
-                var lineTotal = unitPrice * item.Quantity;
+                order.TotalAmount = total;
 
-                total += lineTotal;
+                _context.Orders.Add(order);
 
-                order.OrderItems.Add(new OrderItem
+                try
                 {
-                    ProductId = product.Id,
-                    ProductName = product.Name,
-                    UnitPrice = unitPrice,
-                    Quantity = item.Quantity,
-                    LineTotal = lineTotal
-                });
+                    await _context.SaveChangesAsync(cancellationToken);
+                    await tx.CommitAsync(cancellationToken);
+                }
+                catch (DbUpdateConcurrencyException ex)
+                {
+                    await tx.RollbackAsync(cancellationToken);
+                    throw new InvalidOperationException(
+                        "The order could not be completed due to a concurrent update (stock changed). Please retry.",
+                        ex);
+                }
+                catch
+                {
+                    await tx.RollbackAsync(cancellationToken);
+                    throw;
+                }
 
-                product.Stock -= item.Quantity;
-            }
-
-            order.TotalAmount = total;
-
-            _context.Orders.Add(order);
-            try
-            {
-                await _context.SaveChangesAsync(cancellationToken);
-                await tx.CommitAsync(cancellationToken);
-            }
-            catch (DbUpdateConcurrencyException ex)
-            {
-                await tx.RollbackAsync(cancellationToken);
-                throw new InvalidOperationException("The order could not be completed due to a concurrent update (stock changed). Please retry.", ex);
-            }
-            catch
-            {
-                await tx.RollbackAsync(cancellationToken);
-                throw;
-            }
-
-            return order.Id;
-
+                return order.Id;
+            });
         }
 
         public async Task<OrderResponse?> GetByIdAsync(Guid id, CancellationToken cancellationToken)
@@ -122,7 +129,7 @@ namespace Tenantix.Infrastructure.Orders
                     Id = o.Id,
                     CustomerId = o.CustomerId,
                     TotalAmount = o.TotalAmount,
-                    OrderNumber=o.OrderNumber,
+                    OrderNumber = o.OrderNumber,
                     Status = o.Status.ToString(),
                     CreateAt = o.CreatedAt,
                     Notes = o.Notes,
@@ -137,14 +144,12 @@ namespace Tenantix.Infrastructure.Orders
                         Quantity = oi.Quantity,
                         LineTotal = oi.LineTotal
                     }).ToList()
-                   
-                }).FirstOrDefaultAsync(cancellationToken);
-
-        }                                           
+                })
+                .FirstOrDefaultAsync(cancellationToken);
+        }
 
         public async Task<PagedResponse<OrderListItemResponse>> GetPagedAsync(int page, int pageSize, CancellationToken cancellationToken)
         {
-            
             page = Math.Max(page, 1);
             pageSize = Math.Clamp(pageSize, 1, 200);
 
@@ -152,7 +157,8 @@ namespace Tenantix.Infrastructure.Orders
                 .Where(p => p.IsActive)
                 .OrderByDescending(o => o.CreatedAt);
 
-            var totalCount =await query.CountAsync(cancellationToken);
+            var totalCount = await query.CountAsync(cancellationToken);
+
             var items = await query
                 .Skip((page - 1) * pageSize)
                 .Take(pageSize)
@@ -166,6 +172,7 @@ namespace Tenantix.Infrastructure.Orders
                     CreateAt = o.CreatedAt
                 })
                 .ToListAsync(cancellationToken);
+
             return new PagedResponse<OrderListItemResponse>
             {
                 Items = items,
@@ -173,86 +180,209 @@ namespace Tenantix.Infrastructure.Orders
                 Page = page,
                 PageSize = pageSize
             };
-
         }
+
         public async Task<bool> CancelAsync(Guid id, CancellationToken cancellationToken)
         {
-            await using var tx = await _context.Database.BeginTransactionAsync(cancellationToken);
+            var strategy = _context.Database.CreateExecutionStrategy();
 
-            var order = await _context.Orders.Include(o => o.OrderItems)
-                .FirstOrDefaultAsync(o => o.Id == id , cancellationToken);
-            if(order is null) return false;
-            if(order.Status == OrderStatus.Cancelled) return false;
-            order.Cancel();
-            // restore stock 
-            var productIds = order.OrderItems.Select(oi => oi.ProductId).ToList();
-            var products = await _context.Products
-                .Where(p => productIds.Contains(p.Id))
-                .ToListAsync(cancellationToken);
-            foreach(var item in order.OrderItems)
+            return await strategy.ExecuteAsync(async () =>
             {
-                var product = products.First(p => p.Id == item.ProductId);
-                product.Stock += item.Quantity;
-            }
- 
-            try
-            {
-                await _context.SaveChangesAsync(cancellationToken);
-                await tx.CommitAsync(cancellationToken);
-            }
-            catch (DbUpdateConcurrencyException ex)
-            {
-                await tx.RollbackAsync(cancellationToken);
-                throw new InvalidOperationException("The order cancellation could not be completed due to a concurrent update. Please retry.", ex);
-            }
-            catch
-            {
-                await tx.RollbackAsync(cancellationToken);
-                throw;
-            }
-            return true;
+                await using var tx = await _context.Database.BeginTransactionAsync(cancellationToken);
 
+                var order = await _context.Orders
+                    .Include(o => o.OrderItems)
+                    .FirstOrDefaultAsync(o => o.Id == id, cancellationToken);
+
+                if (order is null) return false;
+                if (order.Status == OrderStatus.Cancelled) return false;
+
+                // Apply domain rule (throws if not allowed)
+                order.Cancel();
+
+                // restore stock
+                var productIds = order.OrderItems.Select(oi => oi.ProductId).ToList();
+
+                var products = await _context.Products
+                    .Where(p => productIds.Contains(p.Id))
+                    .ToListAsync(cancellationToken);
+
+                foreach (var item in order.OrderItems)
+                {
+                    var product = products.First(p => p.Id == item.ProductId);
+                    product.Stock += item.Quantity;
+                }
+
+                try
+                {
+                    await _context.SaveChangesAsync(cancellationToken);
+                    await tx.CommitAsync(cancellationToken);
+                }
+                catch (DbUpdateConcurrencyException ex)
+                {
+                    await tx.RollbackAsync(cancellationToken);
+                    throw new InvalidOperationException(
+                        "The order cancellation could not be completed due to a concurrent update. Please retry.",
+                        ex);
+                }
+                catch
+                {
+                    await tx.RollbackAsync(cancellationToken);
+                    throw;
+                }
+
+                return true;
+            });
         }
 
         public async Task<bool> ConfirmAsync(Guid id, CancellationToken ct)
         {
-            var order = await _context.Orders.
-                FirstOrDefaultAsync(o => o.Id == id , ct);
+            var order = await _context.Orders.FirstOrDefaultAsync(o => o.Id == id, ct);
             if (order is null) return false;
+
             order.Confirm();
             await _context.SaveChangesAsync(ct);
             return true;
         }
+
         public async Task<bool> PackAsync(Guid id, CancellationToken ct)
         {
-            var order = await _context.Orders.
-                FirstOrDefaultAsync(o => o.Id == id , ct);
+            var order = await _context.Orders.FirstOrDefaultAsync(o => o.Id == id, ct);
             if (order is null) return false;
+
             order.Pack();
             await _context.SaveChangesAsync(ct);
             return true;
         }
+
         public async Task<bool> ShipAsync(Guid id, CancellationToken ct)
         {
-            var order = await _context.Orders.
-                FirstOrDefaultAsync(o => o.Id == id , ct);
+            var order = await _context.Orders.FirstOrDefaultAsync(o => o.Id == id, ct);
             if (order is null) return false;
+
             order.Ship();
             await _context.SaveChangesAsync(ct);
             return true;
         }
+
         public async Task<bool> DeliverAsync(Guid id, CancellationToken ct)
         {
-            var order = await _context.Orders.
-                FirstOrDefaultAsync(o => o.Id == id , ct);
+            var order = await _context.Orders.FirstOrDefaultAsync(o => o.Id == id, ct);
             if (order is null) return false;
+
             order.Deliver();
             await _context.SaveChangesAsync(ct);
             return true;
         }
 
+        public async Task<Guid> CheckoutFromCartAsync(Guid customerId, CheckoutRequest request, CancellationToken ct)
+        {
+            if (request is null) throw new ArgumentNullException(nameof(request));
 
+            var strategy = _context.Database.CreateExecutionStrategy();
 
-     
+            return await strategy.ExecuteAsync(async () =>
+            {
+                await using var tx = await _context.Database.BeginTransactionAsync(ct);
+
+                var customerExists = await _context.Customers
+                    .AnyAsync(x => x.Id == customerId && x.IsActive, ct);
+
+                if (!customerExists)
+                    throw new InvalidOperationException("Customer not found.");
+
+        
+                var cart = await _context.Carts
+                    .Include(c => c.Items)
+                    .FirstOrDefaultAsync(c => c.CustomerId == customerId && c.IsActive, ct);
+
+                if (cart is null || cart.Items.Count == 0)
+                    throw new InvalidOperationException("Cart is empty.");
+
+    
+                var productIds = cart.Items.Select(i => i.ProductId).Distinct().ToList();
+
+                var products = await _context.Products
+                    .Where(p => productIds.Contains(p.Id) && p.IsActive)
+                    .ToListAsync(ct);
+
+                if (products.Count != productIds.Count)
+                    throw new InvalidOperationException("One or more products not found.");
+
+             
+                foreach (var item in cart.Items)
+                {
+                    if (item.Quantity <= 0)
+                        throw new InvalidOperationException("Quantity must be greater than zero.");
+
+                    var product = products.First(p => p.Id == item.ProductId);
+
+                    if (product.Stock < item.Quantity)
+                        throw new InvalidOperationException($"Insufficient stock for product: {product.Name}");
+                }
+
+            
+                var order = new Order
+                {
+                    CustomerId = customerId,
+                    Notes = request.Notes,
+                    AddressLine = request.AddressLine,
+                    City = request.City,
+                    Phone = request.Phone,
+                    OrderNumber = $"ORD-{DateTime.UtcNow:yyyyMMddHHmmss}-{Random.Shared.Next(1000, 10000)}",
+                    Status = OrderStatus.Pending
+                };
+
+                decimal total = 0;
+
+                foreach (var item in cart.Items)
+                {
+                    var product = products.First(p => p.Id == item.ProductId);
+
+                    var unitPrice = product.Price;
+                    var lineTotal = unitPrice * item.Quantity;
+
+                    total += lineTotal;
+
+                    order.OrderItems.Add(new OrderItem
+                    {
+                        ProductId = product.Id,
+                        ProductName = product.Name,
+                        UnitPrice = unitPrice,
+                        Quantity = item.Quantity,
+                        LineTotal = lineTotal
+                    });
+
+                    product.Stock -= item.Quantity;
+                }
+
+                order.TotalAmount = total;
+
+                // 6) clear cart items (delete rows)
+                _context.RemoveRange(cart.Items);
+
+                _context.Orders.Add(order);
+
+                try
+                {
+                    await _context.SaveChangesAsync(ct);
+                    await tx.CommitAsync(ct);
+                }
+                catch (DbUpdateConcurrencyException ex)
+                {
+                    await tx.RollbackAsync(ct);
+                    throw new InvalidOperationException(
+                        "Checkout failed due to concurrent update (stock changed). Please retry.",
+                        ex);
+                }
+                catch
+                {
+                    await tx.RollbackAsync(ct);
+                    throw;
+                }
+
+                return order.Id;
+            });
+        }
     }
 }

@@ -116,5 +116,20 @@ namespace Tenantix_WebApi.Controllers
 
             return BadRequest(response);
         }
+
+        [HttpPost("checkout/{customerId:guid}")]
+        [ShouldHavePermission(StoreActions.Create , StoreFeatures.Orders)]
+        public async   Task<IActionResult> CheckoutAsync(Guid customerId , [FromBody] CheckoutRequest request , CancellationToken cancellation)
+        {
+            var response = await Sender.Send(new CheckoutFromCartCommand
+            {
+                CustomerId = customerId,
+                CheckoutRequest = request,
+            });
+            if (response.IsSuccessful)
+                return Ok(response);
+            return BadRequest(response);
+
+        }
     }
 }
