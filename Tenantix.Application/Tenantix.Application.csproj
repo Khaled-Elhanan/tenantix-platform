@@ -11,6 +11,8 @@
     <Folder Include="Abstractions\Services\" />
     <Folder Include="Abstractions\Persistence\" />
     <Folder Include="Common\Models\" />
+    <Folder Include="Features\Payments\DTOs\" />
+    <Folder Include="Features\Payments\Queries\" />
   </ItemGroup>
 
 	<ItemGroup>

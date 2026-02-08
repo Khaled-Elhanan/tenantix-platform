@@ -40,6 +40,7 @@ using Tenantix.Infrastructure.Orders;
 using Tenantix.Infrastructure.Categories.Services;
 using Tenantix.Infrastructure.Identity.Auth.StoreAuth;
 using Tenantix.Infrastructure.Services;
+using Tenantix.Infrastructure.Payments;
 
 namespace Tenantix.Infrastructure;
 
@@ -77,6 +78,7 @@ public static class DependencyInjection
             .AddTransient<IOrderService, OrderService>()
             .AddTransient<ICategoryService, CategoryService>()
             .AddTransient<ICartService, CartService>()
+            .AddTransient<IPaymentService, PaymentService>()
 
 
             .AddPermissions()

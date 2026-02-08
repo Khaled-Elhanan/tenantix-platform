@@ -21,6 +21,11 @@ namespace Tenantix.Domain.Entities
 
         public ICollection<OrderItem> OrderItems { get; set; } = new List<OrderItem>();
 
+        public OrderPaymentStatus PaymentStatus { get; private set; } = OrderPaymentStatus.Pending;
+        public ICollection<Payment> Payments { get; private set; } = new List<Payment>();
+
+
+
         public void Confirm()
         {
             if(Status!=OrderStatus.Pending)
@@ -35,6 +40,10 @@ namespace Tenantix.Domain.Entities
         }
         public void Ship()
         {
+            if(PaymentStatus!=OrderPaymentStatus.Paid)
+            {
+                throw new InvalidOperationException("Order must be paid before shipping .");
+            }
             if (Status != OrderStatus.Packed)
                 throw new InvalidOperationException("Only packed orders can be shipped.");
             Status = OrderStatus.Shipped;
@@ -55,6 +64,31 @@ namespace Tenantix.Domain.Entities
 
             Status = OrderStatus.Cancelled;
         }
+
+        public void MarkAsPaid()
+        {
+            if (PaymentStatus == OrderPaymentStatus.Paid)
+                return;
+
+            PaymentStatus = OrderPaymentStatus.Paid;
+        }
+
+        public void MarkAsPaymentFailed()
+        {
+            if (PaymentStatus == OrderPaymentStatus.Paid)
+                throw new InvalidOperationException("Cannot fail a paid order.");
+
+            PaymentStatus = OrderPaymentStatus.Failed;
+        }
+
+        public void MarkAsRefunded()
+        {
+            if (PaymentStatus != OrderPaymentStatus.Paid)
+                throw new InvalidOperationException("Only paid orders can be refunded.");
+
+            PaymentStatus = OrderPaymentStatus.Refunded;
+        }
+
 
     }
 }
