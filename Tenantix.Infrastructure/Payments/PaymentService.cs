@@ -74,5 +74,19 @@ namespace Tenantix.Infrastructure.Payments
             await _context.SaveChangesAsync(cancellationToken);
             return true;
         }
+
+        public async Task<string> InitiateAsync(Guid paymentId, CancellationToken ct)
+        {
+            var payment = await _context.Payments.FirstOrDefaultAsync(p => p.Id == paymentId && p.IsActive, ct);
+            if (payment is null)
+                throw new InvalidOperationException($"Payment with ID {paymentId} not found or is inactive.");
+            if(payment.Status != PaymentStatus.Initialized)
+                throw new InvalidOperationException("Payment already initiated.");
+            var externalRef = $"PAY-{DateTime.UtcNow:yyyyMMddHHmmss}-{Guid.NewGuid():N}";
+            var paymentUrl = $"https://mock-payments.tenantix.com/pay/{externalRef}";
+            payment.MarkAsPending(externalRef, paymentUrl);
+            await _context.SaveChangesAsync(ct);
+            return paymentUrl;
+        }
     }
 }
