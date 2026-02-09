@@ -18,6 +18,8 @@ namespace Tenantix.Application.Common.Interfaces
         Task<bool> MarkAsFailedAsync(Guid paymentId, CancellationToken cancellationToken);
 
         Task<string> InitiateAsync(Guid paymentId, CancellationToken cancellationToken);
+        Task<bool> RefundAsync(Guid paymentId, CancellationToken cancellationToken);
+
 
 
     }

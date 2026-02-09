@@ -53,6 +53,10 @@ public static class StorePermissions
         new(StoreActions.Update, StoreFeatures.Carts, "Update cart items", "Orders"),
         new(StoreActions.Delete, StoreFeatures.Carts, "Clear/remove cart items", "Orders"),
 
+         // ========= PAYMENTS =========
+        new(StoreActions.Read, StoreFeatures.Payments, "View payments", "Payments"),
+        new(StoreActions.Create, StoreFeatures.Payments, "Create payments", "Payments"),
+        new(StoreActions.Update, StoreFeatures.Payments, "Update payment status", "Payments"),
 
      
 

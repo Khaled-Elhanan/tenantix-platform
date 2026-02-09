@@ -88,5 +88,21 @@ namespace Tenantix.Infrastructure.Payments
             await _context.SaveChangesAsync(ct);
             return paymentUrl;
         }
+        public async Task<bool> RefundAsync(Guid paymentId, CancellationToken ct)
+        {
+            var payment = await _context.Payments
+                .Include(p => p.Order)
+                .FirstOrDefaultAsync(p => p.Id == paymentId && p.IsActive, ct);
+
+            if (payment is null)
+                return false;
+
+            payment.Refund();
+            payment.Order.MarkAsRefunded();
+
+            await _context.SaveChangesAsync(ct);
+            return true;
+        }
+
     }
-}
+}                                         
