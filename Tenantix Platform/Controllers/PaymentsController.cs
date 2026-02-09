@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Mvc;
 using Tenantix.Application.Common.Constants.Authorization.Store;
 using Tenantix.Application.Features.Payments.Commands;
+using Tenantix.Application.Features.Payments.Queries;
 using Tenantix.Domain.Enums;
 using Tenantix.Infrastructure.Identity.Auth;
 
@@ -91,5 +92,23 @@ namespace Tenantix_WebApi.Controllers
 
             return BadRequest(response);
         }
+
+        [HttpGet]
+        [ShouldHavePermission(StoreActions.Read, StoreFeatures.Payments)]
+        public async Task<IActionResult> GetPagedAsync(
+            [FromQuery] int page = 1,
+            [FromQuery] int pageSize = 10)
+        {
+            var response = await Sender.Send(new GetPaymentsPagedQuery
+            {
+                Page = page,
+                PageSize = pageSize
+            });
+
+            return Ok(response);
+        }
+
+
+
     }
 }
