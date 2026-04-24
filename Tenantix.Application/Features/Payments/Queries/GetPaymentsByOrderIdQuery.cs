@@ -1,12 +1,6 @@
 ﻿using MediatR;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using Tenantix.Application.Common.Interfaces;
 using Tenantix.Application.Features.Payments.DTOs;
-using Tenantix.Application.Pipelines;
 using Tenantix.Shared.Responses;
 
 namespace Tenantix.Application.Features.Payments.Queries

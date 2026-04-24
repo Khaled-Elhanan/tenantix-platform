@@ -16,8 +16,9 @@ namespace Tenantix.Application.Features.Payments.Queries
         public int Page { get; set; } = 1;
         public int PageSize { get; set; } = 10;
     }
+
     public class GetPaymentsPagedQueryHandler
-    : IRequestHandler<GetPaymentsPagedQuery, IResponseWrapper>
+        : IRequestHandler<GetPaymentsPagedQuery, IResponseWrapper>
     {
         private readonly IPaymentService _paymentService;
 
@@ -39,3 +40,4 @@ namespace Tenantix.Application.Features.Payments.Queries
                 .SuccessAsync(result);
         }
     }
+}

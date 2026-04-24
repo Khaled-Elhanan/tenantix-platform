@@ -26,7 +26,7 @@ namespace Tenantix.Application.Common.Interfaces
         Guid orderId,
         CancellationToken cancellationToken);
 
-        Task<PagedResponse<PaymentResponse>> GetByPaymentIdAsync(
+        Task<PagedResponse<PaymentResponse>> GetPagedAsync(
             int page ,
             int pageSize ,
             CancellationToken cancellationToken);
