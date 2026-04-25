@@ -7,6 +7,16 @@ Tenantix focuses on two things:
 1) **Strict tenant isolation** (no cross-tenant data access)  
 2) **Production-style authorization** (permissions + policies + handlers), with safe order/stock operations.
 
+---
+
+## 🚀 Live Demo
+
+[![Health](https://img.shields.io/badge/Health-Live-brightgreen?style=for-the-badge&logo=render&logoColor=white)](https://tenantix-api.onrender.com/healthz)
+[![Swagger](https://img.shields.io/badge/Swagger-UI-85EA2D?style=for-the-badge&logo=swagger&logoColor=black)](https://tenantix-api.onrender.com/swagger/index.html#/Tenants/Tenants_CreateTenant)
+[![Platform](https://img.shields.io/badge/Deployed_on-Render-46E3B7?style=for-the-badge&logo=render&logoColor=white)](https://render.com)
+
+> Most endpoints require `Authorization: Bearer <JWT>` and a `tenant` header — see [API Usage](#-api-usage).
+---
 > **Core model**  
 > - **Platform Tenant**: manages the tenant lifecycle (create/activate/deactivate/upgrade).  
 > - **Store Tenant**: owns tenant-scoped business modules (Products, Categories, Customers, Orders, Carts).  
